@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EFV — Database Inventory</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#e9efff;--surface:#ffffff;--surface-2:#f5f8ff;
+  --border:#cfd8e9;--border-strong:#bac8ff;
+  --text:#102a43;--text-2:#334e68;--muted:#64748b;
+  --primary:#102a43;--primary-600:#1e3a8a;--primary-50:#dbeafe;
+  --green:#16a34a;--green-50:#ecfdf5;
+  --orange:#c2410c;--orange-50:#fff7ed;
+  --red:#b91c1c;--red-50:#fee2e2;
+  --slate:#475569;--slate-50:#f1f5f9;
+  --radius:18px;--radius-sm:12px;
+  --shadow-sm:0 10px 20px rgba(15,23,42,.06);
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:'Manrope',system-ui,sans-serif;font-size:14px;line-height:1.5;color:var(--text);background:var(--bg)}
+
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.sidebar{background:var(--primary);color:#fff;padding:28px 20px;display:flex;flex-direction:column;gap:26px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:12px;padding:0 8px}
+.brand-mark{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary-600));color:#fff;display:grid;place-items:center;font-weight:800}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav-item{padding:10px 12px;border-radius:var(--radius-sm);color:#94a3b8;font-weight:500;transition:all .15s var(--ease)}
+.nav-item:hover{background:rgba(255,255,255,.05);color:#fff}
+.nav-item.active{background:var(--primary-50);color:var(--primary);font-weight:600}
+
+.main{padding:28px 32px 60px;max-width:100%;min-width:0}
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:24px;background:#fff;border-radius:18px;padding:22px 24px;box-shadow:0 12px 32px rgba(15,23,42,.06)}
+.page-title{font-size:26px;color:var(--primary)}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:14px;border:1px solid rgba(16,42,67,.12);font-weight:600;font-size:13px;background:var(--surface);color:var(--text);cursor:pointer}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-sm{padding:6px 10px;font-size:12px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden}
+.card-head{padding:16px 20px;border-bottom:1px solid var(--border)}
+
+.filters{display:flex;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:end;background:var(--surface-2)}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field.grow{flex:1;min-width:220px}
+.field-label{font-size:11px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.5px}
+.field input,.field select{font-family:inherit;font-size:13px;padding:8px 10px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text);min-width:140px}
+
+.table-wrap{overflow-x:auto}
+.table{width:100%;border-collapse:collapse;font-size:13px;min-width:820px}
+.table th,.table td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border)}
+.table th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-2);font-weight:700;background:var(--surface-2)}
+.table tbody tr:hover{background:var(--surface-2)}
+.cell-id{font-family:monospace;font-size:11px;color:var(--text-2)}
+
+.status-pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+.status-complete{background:var(--green-50);color:var(--green)}
+.status-incomplete{background:var(--orange-50);color:var(--orange)}
+.status-pending{background:var(--red-50);color:var(--red)}
+.status-invalid{background:var(--slate-50);color:var(--slate)}
+
+.pagination{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap}
+.pagination-controls{display:flex;align-items:center;gap:8px}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">EF</div>
+      <div><strong>Extended Family</strong><div style="font-size:11px;color:#94a3b8">Validation Monitoring</div></div>
+    </div>
+    <nav class="nav">
+      <a href="efv-overview.html" class="nav-item">Overview</a>
+      <a href="efv-municipalities.html" class="nav-item">Municipalities</a>
+      <a href="efv-ml.html" class="nav-item">ML Performance</a>
+      <a href="efv-records.html" class="nav-item active">Records</a>
+    </nav>
+    <div style="margin-top:auto; padding:0 8px; font-size:12px; color:#94a3b8">CBDO · Lio Soliven</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1 class="page-title">Records Inventory</h1>
+        <p style="margin:4px 0 0;color:var(--text-2)">Real-time structural log visualization. Use filters to check dynamic fields.</p>
+      </div>
+      <div>
+        <button id="refreshBtn" class="btn btn-primary">Sync Database</button>
+        <div id="updatedAt" class="muted small" style="margin-top:4px">Last updated: --</div>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="filters">
+        <div class="field grow">
+          <label class="field-label">Search Context</label>
+          <input type="text" id="searchFilter" placeholder="Search criteria (ID, Barangay, ML Officer)..." />
+        </div>
+        <div class="field">
+          <label class="field-label">Municipality</label>
+          <select id="muniFilter"><option value="">All Municipalities</option></select>
+        </div>
+        <div class="field">
+          <label class="field-label">Status</label>
+          <select id="statusFilter">
+            <option value="">All Statuses</option>
+            <option value="COMPLETE">Complete</option>
+            <option value="INCOMPLETE">Incomplete</option>
+            <option value="INVALID">Invalid</option>
+            <option value="PENDING">Pending</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr>
+            <th>ID Reference</th>
+            <th>Municipality</th>
+            <th>Barangay Cluster</th>
+            <th>ML Assigned</th>
+            <th>Validated</th>
+            <th>RELIC</th>
+            <th>Encoding Exception Reason</th>
+            <th>Status Badge</th>
+          </tr></thead>
+          <tbody id="recordsTbody"><tr><td colspan="8" style="padding:20px">Streaming master elements...</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <div class="muted small" id="paginationInfo">Showing -- records</div>
+        <div class="pagination-controls">
+          <button id="prevPageBtn" class="btn btn-sm" disabled>Previous</button>
+          <span id="pageIndicator" class="muted small">Page -- of --</span>
+          <button id="nextPageBtn" class="btn btn-sm" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbxx4y8UYT86Mx4XH5FktCywScAcphlNdCZeHqJ8VZQBh0y4rsPo8SXOMpOpMvc2EDN5_A/exec';
+const state = { page: 1, pageSize: 15, rawRecords: [], filteredRecords: [] };
+
+function debounce(fn, ms = 350) {
+  let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+
+function statusClass(s) {
+  const k = String(s || '').toUpperCase();
+  if (k === 'COMPLETE') return 'status-complete';
+  if (k === 'INCOMPLETE') return 'status-incomplete';
+  if (k === 'INVALID') return 'status-invalid';
+  return 'status-pending';
+}
+
+async function fetchMasterRecords() {
+  const tbody = document.getElementById('recordsTbody');
+  try {
+    const res = await fetch(`${API_URL}?action=records`, { method: 'GET', redirect: 'follow' });
+    const body = await res.json();
+    if (!res.ok || body.success === false) throw new Error();
+
+    state.rawRecords = body.data || [];
+    populateMunicipalityDropdown();
+    applyFiltersAndRender();
+    document.getElementById('updatedAt').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+  } catch(e) { tbody.innerHTML = '<tr><td colspan="8" style="padding:20px">Failed to load central databank link.</td></tr>'; }
+}
+
+function populateMunicipalityDropdown() {
+  const select = document.getElementById('muniFilter');
+  const munis = [...new Set(state.rawRecords.map(r => r.MUNICIPALITY))].filter(Boolean).sort();
+  select.innerHTML = '<option value="">All Municipalities</option>' + 
+    munis.map(m => `<option value="${m}">${m}</option>`).join('');
+}
+
+function applyFiltersAndRender() {
+  const searchVal = document.getElementById('searchFilter').value.toLowerCase().trim();
+  const muniVal = document.getElementById('muniFilter').value;
+  const statusVal = document.getElementById('statusFilter').value;
+
+  state.filteredRecords = state.rawRecords.filter(r => {
+    const matchesSearch = !searchVal || 
+      String(r.ID||'').toLowerCase().includes(searchVal) ||
+      String(r.BARANGAY||'').toLowerCase().includes(searchVal) ||
+      String(r.ML_ASSIGNED||'').toLowerCase().includes(searchVal);
+    
+    const matchesMuni = !muniVal || r.MUNICIPALITY === muniVal;
+    const matchesStatus = !statusVal || String(r.FINAL_STATUS||'').toUpperCase() === statusVal;
+
+    return matchesSearch && matchesMuni && matchesStatus;
+  });
+
+  state.page = 1;
+  renderTableSlice();
+}
+
+function renderTableSlice() {
+  const tbody = document.getElementById('recordsTbody');
+  const total = state.filteredRecords.length;
+  const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
+  
+  const start = (state.page - 1) * state.pageSize;
+  const slice = state.filteredRecords.slice(start, start + state.pageSize);
+
+  if (!slice.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="padding:20px;text-align:center;">No dataset matched your structural query configuration.</td></tr>';
+    document.getElementById('paginationInfo').textContent = 'Showing 0 items';
+    document.getElementById('pageIndicator').textContent = 'Page 1 of 1';
+    document.getElementById('prevPageBtn').disabled = true;
+    document.getElementById('nextPageBtn').disabled = true;
+    return;
+  }
+
+  tbody.innerHTML = slice.map(r => `
+    <tr>
+      <td class="cell-id"><strong>${String(r.ID||'').slice(0,8)}</strong></td>
+      <td>${r.MUNICIPALITY || ''}</td>
+      <td>${r.BARANGAY || ''}</td>
+      <td>${r.ML_ASSIGNED || ''}</td>
+      <td>${r.VALIDATED_WITH_FORMS || ''}</td>
+      <td>${r.UPDATED_IN_RELIC || ''}</td>
+      <td style="font-size:11px; color:var(--muted)">${r.REASON_FOR_NOT_ENCODING || 'NONE'}</td>
+      <td><span class="status-pill ${statusClass(r.FINAL_STATUS)}">${r.FINAL_STATUS || 'PENDING'}</span></td>
+    </tr>
+  `).join('');
+
+  document.getElementById('paginationInfo').textContent = `Showing ${slice.length} of ${total.toLocaleString()} record(s)`;
+  document.getElementById('pageIndicator').textContent = `Page ${state.page} of ${totalPages}`;
+  document.getElementById('prevPageBtn').disabled = state.page <= 1;
+  document.getElementById('nextPageBtn').disabled = state.page >= totalPages;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('refreshBtn').addEventListener('click', fetchMasterRecords);
+  document.getElementById('searchFilter').addEventListener('input', debounce(applyFiltersAndRender, 300));
+  document.getElementById('muniFilter').addEventListener('change', applyFiltersAndRender);
+  document.getElementById('statusFilter').addEventListener('change', applyFiltersAndRender);
+
+  document.getElementById('prevPageBtn').addEventListener('click', () => { if(state.page > 1) { state.page--; renderTableSlice(); } });
+  document.getElementById('nextPageBtn').addEventListener('click', () => { 
+    const totalPages = Math.ceil(state.filteredRecords.length / state.pageSize);
+    if(state.page < totalPages) { state.page++; renderTableSlice(); } 
+  });
+
+  fetchMasterRecords();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Extended Family Validation Monitoring</title>
+
+<!--
+  ============================================================
+  Backend: Google Apps Script web app
+  Contract aligned with the deployed Code.gs:
+
+    GET ?action=summary
+      -> { success, data: { total_records, complete, incomplete, invalid, pending } }
+    GET ?action=statusChart
+      -> { success, data: { COMPLETE, INCOMPLETE, INVALID, PENDING } }
+    GET ?action=municipalitySummary
+      -> { success, data: [{ municipality, total, complete, incomplete, invalid, pending }] }
+    GET ?action=mlPerformance
+      -> { success, data: [{ ml_assigned, total, complete, incomplete, invalid, pending }] }
+    GET ?action=records&search=&municipality=&status=
+      -> { success, total, data: [ <row with UPPERCASE keys> ] }
+
+    POST ?action=create
+      body: { municipality, barangay, ml_assigned,
+              validated_with_forms, updated_in_relic, reason_for_not_encoding }
+      -> { success, message, id }
+
+    POST ?action=update&id=<uuid>
+      body: same as create
+      -> { success, message }
+
+    POST ?action=delete&id=<uuid>
+      body: {}
+      -> { success, message }
+
+  Status truth table (single source of truth):
+    E=NO                              -> PENDING
+    E=YES & F=YES & G=NO              -> COMPLETE
+    E=YES & F=YES & G=YES             -> INVALID
+    E=YES & F=NO  & G=YES             -> COMPLETE
+    E=YES & F=NO  & G=NO              -> INCOMPLETE
+    where E=validated_with_forms, F=updated_in_relic, G=reason_for_not_encoding
+  ============================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<style>
+:root{
+  --bg:#e9efff;--surface:#ffffff;--surface-2:#f5f8ff;
+  --border:#cfd8e9;--border-strong:#bac8ff;
+  --text:#102a43;--text-2:#334e68;--muted:#64748b;
+  --primary:#102a43;--primary-600:#1e3a8a;--primary-50:#dbeafe;
+  --green:#16a34a;--green-50:#ecfdf5;
+  --orange:#c2410c;--orange-50:#fff7ed;
+  --red:#b91c1c;--red-50:#fee2e2;
+  --slate:#475569;--slate-50:#f1f5f9;
+  --radius:18px;--radius-sm:12px;
+  --shadow-sm:0 10px 20px rgba(15,23,42,.06);
+  --shadow:0 22px 60px rgba(15,23,42,.09);
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:'Manrope',system-ui,sans-serif;font-size:14px;line-height:1.5;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:700}
+button{font-family:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.hidden{display:none!important}
+
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.sidebar{background:var(--primary);border-right:none;color:#fff;box-shadow:2px 0 25px rgba(15,23,42,.09);padding:28px 20px;display:flex;flex-direction:column;gap:26px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:12px;padding:0 8px}
+.brand-mark{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary-600));color:#fff;display:grid;place-items:center;font-weight:800;letter-spacing:.5px;box-shadow:var(--shadow)}
+.brand-title{font-weight:700;font-size:15px}
+.brand-sub{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav-item{padding:10px 12px;border-radius:var(--radius-sm);color:var(--text-2);font-weight:500;transition:all .15s var(--ease)}
+.nav-item:hover{background:var(--surface-2);color:var(--text)}
+.nav-item.active{background:var(--primary-50);color:var(--primary);font-weight:600}
+.sidebar-foot{margin-top:auto;padding:0 8px}
+
+.main{padding:28px 32px 60px;max-width:100%;min-width:0}
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:24px;flex-wrap:wrap;background:rgba(255,255,255,.92);border:1px solid rgba(16,42,67,.08);border-radius:18px;padding:22px 24px;box-shadow:0 12px 32px rgba(15,23,42,.06)}
+.page-title{font-size:26px;color:var(--primary)}
+.page-sub{margin:4px 0 0;color:var(--text-2)}
+.topbar-actions{display:flex;gap:8px}
+.section{margin-bottom:32px;scroll-margin-top:16px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:14px;border:1px solid rgba(16,42,67,.12);font-weight:600;font-size:13px;transition:all .15s var(--ease);background:var(--surface);color:var(--text)}
+.btn-icon{font-size:16px;line-height:1}
+.btn-sm{padding:6px 10px;font-size:12px}
+.btn-icon-only{padding:4px 8px;font-size:18px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-600)}
+.btn-ghost{background:var(--surface);border-color:var(--border);color:var(--text-2)}
+.btn-ghost:hover{background:var(--surface-2);color:var(--text)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{filter:brightness(.92)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden}
+.card-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.card-title{font-size:15px}
+
+/* 5 KPI cards: Total + 4 statuses */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);transition:transform .15s var(--ease),box-shadow .15s var(--ease);min-width:0}
+.kpi-card:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.kpi-green{border-left-color:var(--green)}
+.kpi-orange{border-left-color:var(--orange)}
+.kpi-red{border-left-color:var(--red)}
+.kpi-slate{border-left-color:var(--slate)}
+.kpi-label{color:var(--text-2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:28px;font-weight:800;margin:4px 0 4px;letter-spacing:-.02em}
+.kpi-foot{font-size:11px}
+
+.grid-2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+.chart-wrap{padding:16px 20px 20px;position:relative;height:320px;display:grid;place-items:center}
+.chart-wrap canvas{max-height:100%}
+.empty{color:var(--muted);font-size:13px}
+.facts{list-style:none;margin:0;padding:8px 20px 16px}
+.facts-item{padding:10px 0;border-bottom:1px dashed var(--border);display:flex;justify-content:space-between;gap:8px}
+.facts-item:last-child{border-bottom:0}
+.facts-key{color:var(--text-2)}
+.facts-val{font-weight:700}
+
+.table-wrap{overflow-x:auto}
+.table{width:100%;border-collapse:collapse;font-size:13px;min-width:720px}
+.table th,.table td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border)}
+.table th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-2);font-weight:700;background:var(--surface-2);position:sticky;top:0}
+.table tbody tr:hover{background:var(--surface-2)}
+.table .num{text-align:right;font-variant-numeric:tabular-nums}
+.table .action-col{width:140px;white-space:nowrap}
+.table .loading{text-align:center;color:var(--muted);padding:24px}
+.cell-id{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--text-2)}
+
+.progress{display:flex;align-items:center;gap:8px}
+.progress-bar{flex:1;height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--green),#22c55e);border-radius:999px;transition:width .3s var(--ease)}
+.progress-label{font-size:11px;color:var(--muted);min-width:36px;text-align:right}
+
+.status-pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+.status-complete{background:var(--green-50);color:var(--green)}
+.status-incomplete{background:var(--orange-50);color:var(--orange)}
+.status-pending{background:var(--red-50);color:var(--red)}
+.status-invalid{background:var(--slate-50);color:var(--slate)}
+.status-unknown{background:#f1f5f9;color:var(--muted)}
+
+.filters{display:flex;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:end;background:var(--surface-2)}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field.grow{flex:1;min-width:220px}
+.field-label{font-size:11px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.5px}
+.field input,.field select,.field textarea{font-family:inherit;font-size:13px;padding:8px 10px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text);min-width:140px;transition:border-color .15s var(--ease),box-shadow .15s var(--ease)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-50)}
+
+.pagination{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap}
+.pagination-controls{display:flex;align-items:center;gap:8px}
+
+.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center}
+.modal.hidden{display:none}
+.modal-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px)}
+.modal-panel{position:relative;width:min(620px,92vw);background:var(--surface);border-radius:var(--radius);box-shadow:0 20px 50px rgba(15,23,42,.25);animation:pop .15s var(--ease);max-height:90vh;overflow:auto}
+@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-body{padding:16px 20px}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:12px 20px 16px;border-top:1px solid var(--border)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-col-2{grid-column:1 / span 2}
+.status-preview{background:var(--surface-2);border:1px dashed var(--border-strong);padding:10px 12px;border-radius:8px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text-2)}
+
+.toast-container{position:fixed;right:20px;bottom:20px;z-index:60;display:flex;flex-direction:column;gap:8px}
+.toast{min-width:240px;max-width:360px;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--primary);padding:12px 14px;border-radius:10px;box-shadow:var(--shadow);font-size:13px;animation:slide-in .2s var(--ease)}
+.toast.success{border-left-color:var(--green)}
+.toast.error{border-left-color:var(--red)}
+.toast.warn{border-left-color:var(--orange)}
+@keyframes slide-in{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+.connection-banner{padding:10px 16px;background:#fef3c7;border:1px solid #fde68a;color:#78350f;border-radius:10px;font-size:13px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.connection-banner.error{background:#fef2f2;border-color:#fecaca;color:#7f1d1d}
+
+@media (max-width:1280px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:1100px){.grid-2{grid-template-columns:1fr}}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;flex-direction:row;align-items:center;padding:12px 16px}
+  .sidebar-foot{display:none}
+  .nav{flex-direction:row;flex-wrap:wrap;gap:4px;margin-left:auto}
+  .nav-item{padding:6px 10px;font-size:13px}
+  .main{padding:20px 16px 60px}
+  .form-grid{grid-template-columns:1fr}
+  .form-col-2{grid-column:1}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:520px){.kpi-grid{grid-template-columns:1fr}.topbar{align-items:flex-start}.page-title{font-size:20px}.brand-text{display:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">EF</div>
+      <div class="brand-text">
+        <div class="brand-title">Extended Family</div>
+        <div class="brand-sub">Validation Monitoring</div>
+      </div>
+    </div>
+      <nav class="nav">
+      <a href="efv-overview.html" class="nav-item active" data-section="overview">Overview</a>
+      <a href="efv-municipalities.html" class="nav-item" data-section="municipalities">Municipalities</a>
+      <a href="efv-ml.html" class="nav-item" data-section="ml">ML Performance</a>
+      <a href="efv-records.html" class="nav-item" data-section="records">Records</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="muted small">CBDO . Lio Soliven</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1 class="page-title">Validation Dashboard</h1>
+        <p class="page-sub muted">Track Extended Family validation and RELIC encoding progress.</p>
+      </div>
+      <div class="topbar-actions">
+        <button id="refreshBtn" class="btn" type="button">Refresh</button>
+        <div id="updatedAt" class="muted small">Last updated: --</div>
+      </div>
+    </header>
+
+    <div id="connBanner" class="connection-banner hidden">
+      <span id="connMsg">Connecting to Apps Script...</span>
+    </div>
+
+    <!-- Overview -->
+    <section id="overview" class="section">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Total Records</div>
+          <div class="kpi-value" id="kpiTotal">--</div>
+          <div class="kpi-foot muted">All entries</div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-label">Complete</div>
+          <div class="kpi-value" id="kpiComplete">--</div>
+          <div class="kpi-foot muted"><span id="kpiCompletionRate">--</span>% completion</div>
+        </div>
+        <div class="kpi-card kpi-orange">
+          <div class="kpi-label">Incomplete</div>
+          <div class="kpi-value" id="kpiIncomplete">--</div>
+          <div class="kpi-foot muted">RELIC pending</div>
+        </div>
+        <div class="kpi-card kpi-slate">
+          <div class="kpi-label">Invalid</div>
+          <div class="kpi-value" id="kpiInvalid">--</div>
+          <div class="kpi-foot muted">Conflicting data</div>
+        </div>
+        <div class="kpi-card kpi-red">
+          <div class="kpi-label">Pending</div>
+          <div class="kpi-value" id="kpiPending">--</div>
+          <div class="kpi-foot muted">Not yet validated</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <h2 class="card-title">Status Distribution</h2>
+            <span class="muted small">All records</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="statusChart"></canvas>
+            <div id="statusChartEmpty" class="empty hidden">No data to display.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2 class="card-title">Quick Facts</h2></div>
+          <ul id="quickFacts" class="facts"><li class="facts-item"><span>Loading...</span></li></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Municipalities -->
+    <section id="municipalities" class="section">
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">Municipality Summary</h2>
+          <span class="muted small">Grouped totals per municipality</span>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr>
+              <th>Municipality</th>
+              <th class="num">Total</th>
+              <th class="num">Complete</th>
+              <th class="num">Incomplete</th>
+              <th class="num">Invalid</th>
+              <th class="num">Pending</th>
+            </tr></thead>
+            <tbody id="municipalityTbody"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ML Performance -->
+    <section id="ml" class="section">
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">ML Performance</h2>
+          <span class="muted small">Cases per Municipal Link</span>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr>
+              <th>ML Assigned</th>
+              <th class="num">Total</th>
+              <th class="num">Complete</th>
+              <th class="num">Pending</th>
+              <th>Progress</th>
+            </tr></thead>
+            <tbody id="mlTbody"><tr><td colspan="5" class="loading">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Records -->
+    <section id="records" class="section">
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">Records</h2>
+          <span class="muted small">Search, filter and manage entries</span>
+        </div>
+        <!-- Filters removed: read-only presentation of API data -->
+
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr>
+              <th>ID</th>
+              <th>Municipality</th>
+              <th>Barangay</th>
+              <th>ML Assigned</th>
+              <th>Validated</th>
+              <th>RELIC</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <!-- Actions removed in read-only mode -->
+            </tr></thead>
+              <tbody id="recordsTbody"><tr><td colspan="8" class="loading">Loading...</td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <div class="muted small" id="paginationInfo">--</div>
+          <div class="pagination-controls">
+            <span id="pageIndicator" class="muted small">--</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Modal and creation UI removed for read-only dashboard -->
+
+<div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const API_URL = 'https://script.google.com/macros/s/AKfycbxx4y8UYT86Mx4XH5FktCywScAcphlNdCZeHqJ8VZQBh0y4rsPo8SXOMpOpMvc2EDN5_A/exec';
+const STATUSES = ['COMPLETE', 'INCOMPLETE', 'INVALID', 'PENDING'];
+
+/* ============================================================
+   API CLIENT
+   POST uses text/plain to avoid CORS preflight. Apps Script
+   doesn't answer OPTIONS, so anything other than a simple
+   request will fail.
+   ============================================================ */
+const Api = (() => {
+  function buildUrl(params) {
+    const url = new URL(API_URL);
+    Object.entries(params || {}).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, v);
+    });
+    return url.toString();
+  }
+
+  async function unwrap(res) {
+    const text = await res.text();
+    let body;
+    try { body = JSON.parse(text); }
+    catch (_) {
+      throw new Error('Non-JSON response: ' + text.slice(0, 140));
+    }
+    if (!res.ok || body.success === false) {
+      throw new Error(body.message || body.error || `HTTP ${res.status}`);
+    }
+    return body;
+  }
+
+  async function get(action, params = {}) {
+    const url = buildUrl({ action, ...params });
+    const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+    return unwrap(res);
+  }
+
+  // Apps Script reads ?action= from the URL query string, the JSON
+  // body holds the record data (or {} for delete).
+  async function post(action, qs = {}, body = {}) {
+    const url = buildUrl({ action, ...qs });
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(body),
+      redirect: 'follow',
+    });
+    return unwrap(res);
+  }
+
+  return {
+    summary:             () => get('summary').then(r => r.data),
+    statusChart:         () => get('statusChart').then(r => r.data),
+    municipalitySummary: () => get('municipalitySummary').then(r => r.data),
+    mlPerformance:       () => get('mlPerformance').then(r => r.data),
+    listRecords:  (qs)        => get('records', qs),    // returns { success, total, data }
+    create:       (data)      => post('create', {}, data),
+    update:       (id, data)  => post('update', { id }, data),
+    remove:       (id)        => post('delete', { id }, {}),
+  };
+})();
+
+/* ============================================================
+   STATUS HELPERS
+   computeStatus mirrors the Apps Script truth table so the
+   modal can show a live preview without hitting the server.
+   ============================================================ */
+function computeStatus(validated, relic, reason) {
+  const v = String(validated || '').toUpperCase();
+  const f = String(relic     || '').toUpperCase();
+  const g = String(reason    || '').toUpperCase();
+  if (v === 'NO') return 'PENDING';
+  if (v === 'YES' && f === 'YES' && g === 'NO')  return 'COMPLETE';
+  if (v === 'YES' && f === 'YES' && g === 'YES') return 'INVALID';
+  if (v === 'YES' && f === 'NO'  && g === 'YES') return 'COMPLETE';
+  if (v === 'YES' && f === 'NO'  && g === 'NO')  return 'INCOMPLETE';
+  return 'PENDING';
+}
+function statusClass(s) {
+  const k = String(s || '').toUpperCase();
+  if (k === 'COMPLETE')   return 'status-complete';
+  if (k === 'INCOMPLETE') return 'status-incomplete';
+  if (k === 'INVALID')    return 'status-invalid';
+  if (k === 'PENDING')    return 'status-pending';
+  return 'status-unknown';
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+const Toast = (() => {
+  const host = () => document.getElementById('toastContainer');
+  function show(msg, kind = 'info', ttl = 3200) {
+    const el = document.createElement('div');
+    el.className = `toast ${kind}`;
+    el.textContent = msg;
+    host().appendChild(el);
+    setTimeout(() => {
+      el.style.transition = 'opacity .2s ease';
+      el.style.opacity = '0';
+      setTimeout(() => el.remove(), 220);
+    }, ttl);
+  }
+  return {
+    info: m => show(m, 'info'), success: m => show(m, 'success'),
+    error: m => show(m, 'error', 5500), warn: m => show(m, 'warn'),
+  };
+})();
+
+/* ============================================================
+   CHART
+   ============================================================ */
+const Charts = (() => {
+  let chart = null;
+  const COLOR = {
+    COMPLETE:   '#16a34a',
+    INCOMPLETE: '#ea580c',
+    INVALID:    '#475569',
+    PENDING:    '#dc2626',
+  };
+  function renderStatusPie(statusMap) {
+    const canvas = document.getElementById('statusChart');
+    const empty  = document.getElementById('statusChartEmpty');
+    const labels = STATUSES;
+    const values = labels.map(l => Number((statusMap || {})[l]) || 0);
+    const total  = values.reduce((a, b) => a + b, 0);
+
+    if (total === 0) {
+      canvas.classList.add('hidden'); empty.classList.remove('hidden');
+      if (chart) { chart.destroy(); chart = null; }
+      return;
+    }
+    canvas.classList.remove('hidden'); empty.classList.add('hidden');
+
+    const cfg = {
+      type: 'doughnut',
+      data: { labels, datasets: [{
+        data: values,
+        backgroundColor: labels.map(l => COLOR[l] || '#94a3b8'),
+        borderColor: '#fff', borderWidth: 2, hoverOffset: 6,
+      }]},
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '62%',
+        plugins: {
+          legend: { position: 'bottom', labels: {
+            font: { family: 'Manrope', size: 12, weight: '600' },
+            color: '#475569', boxWidth: 12, boxHeight: 12, padding: 14,
+          }},
+          tooltip: {
+            backgroundColor: '#0f172a',
+            titleFont: { family: 'Manrope', weight: '700' },
+            bodyFont: { family: 'Manrope' },
+            padding: 10,
+            callbacks: { label: ctx => {
+              const v = ctx.parsed;
+              const pct = ((v / total) * 100).toFixed(1);
+              return ` ${ctx.label}: ${v} (${pct}%)`;
+            }},
+          },
+        },
+      },
+    };
+    if (chart) { chart.data = cfg.data; chart.options = cfg.options; chart.update(); }
+    else       { chart = new Chart(canvas, cfg); }
+  }
+  return { renderStatusPie };
+})();
+
+/* Modal and record editing removed for read-only dashboard */
+
+/* ============================================================
+   APP
+   ============================================================ */
+(() => {
+  const $ = id => document.getElementById(id);
+  const state = {
+    page: 1, pageSize: 10,
+    search: '', municipality: '', status: '',
+    records: [],        // currently loaded records (post server-side filter)
+  };
+
+  // ---- helpers ----
+  function fmtInt(n) { return Number(n || 0).toLocaleString('en-US'); }
+  function escapeHtml(v) {
+    if (v === null || v === undefined) return '';
+    return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function debounce(fn, ms = 350) {
+    let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+  }
+  function setBanner(kind, msg) {
+    const b = $('connBanner');
+    if (kind === 'ok') { b.classList.add('hidden'); return; }
+    b.classList.remove('hidden');
+    b.classList.toggle('error', kind === 'error');
+    $('connMsg').textContent = msg;
+  }
+  // Apps Script returns rows with UPPERCASE keys. Normalize.
+  function normalizeRecord(r) {
+    return {
+      id:                      r.ID,
+      municipality:            r.MUNICIPALITY,
+      barangay:                r.BARANGAY,
+      ml_assigned:             r.ML_ASSIGNED,
+      validated_with_forms:    String(r.VALIDATED_WITH_FORMS || '').toUpperCase(),
+      updated_in_relic:        String(r.UPDATED_IN_RELIC || '').toUpperCase(),
+      reason_for_not_encoding: String(r.REASON_FOR_NOT_ENCODING || '').toUpperCase(),
+      final_status:            String(r.FINAL_STATUS || '').toUpperCase(),
+    };
+  }
+
+  // ---- renderers ----
+  async function renderSummary() {
+    try {
+      const s = await Api.summary();
+      const total = Number(s.total_records || 0);
+      const done  = Number(s.complete || 0);
+      const rate  = total === 0 ? 0 : Number(((done / total) * 100).toFixed(1));
+
+      $('kpiTotal').textContent          = fmtInt(total);
+      $('kpiComplete').textContent       = fmtInt(s.complete);
+      $('kpiIncomplete').textContent     = fmtInt(s.incomplete);
+      $('kpiInvalid').textContent        = fmtInt(s.invalid);
+      $('kpiPending').textContent        = fmtInt(s.pending);
+      $('kpiCompletionRate').textContent = rate;
+
+      const facts = [
+        { k: 'Total records',     v: fmtInt(total) },
+        { k: 'Complete',          v: fmtInt(s.complete) },
+        { k: 'Incomplete',        v: fmtInt(s.incomplete) },
+        { k: 'Invalid',           v: fmtInt(s.invalid) },
+        { k: 'Pending',           v: fmtInt(s.pending) },
+        { k: 'Completion rate',   v: `${rate}%` },
+      ];
+      $('quickFacts').innerHTML = facts.map(f =>
+        `<li class="facts-item"><span class="facts-key">${f.k}</span><span class="facts-val">${f.v}</span></li>`
+      ).join('');
+      return true;
+    } catch (err) {
+      Toast.error(`Summary: ${err.message}`);
+      return false;
+    }
+  }
+
+  async function renderChart() {
+    try { Charts.renderStatusPie(await Api.statusChart()); }
+    catch (err) { Toast.error(`Chart: ${err.message}`); }
+  }
+
+  async function renderMunicipalitySummary() {
+    const tbody = $('municipalityTbody');
+    try {
+      const rows = await Api.municipalitySummary();
+
+      // Also use this data to populate the municipality filter dropdown.
+      populateMuniFilter(rows.map(r => r.municipality));
+
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="loading">No data yet.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = rows.map(r => `
+        <tr>
+          <td>${escapeHtml(r.municipality)}</td>
+          <td class="num">${fmtInt(r.total)}</td>
+          <td class="num"><span class="status-pill status-complete">${fmtInt(r.complete)}</span></td>
+          <td class="num"><span class="status-pill status-incomplete">${fmtInt(r.incomplete)}</span></td>
+          <td class="num"><span class="status-pill status-invalid">${fmtInt(r.invalid)}</span></td>
+          <td class="num"><span class="status-pill status-pending">${fmtInt(r.pending)}</span></td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="6" class="loading">Error: ${escapeHtml(err.message)}</td></tr>`;
+    }
+  }
+
+  function populateMuniFilter(municipalities) {
+    const sel = $('muniFilter');
+    if (!sel) return; // no-op in read-only mode
+    const current = sel.value;
+    const sorted = [...new Set(municipalities)].filter(Boolean).sort();
+    sel.innerHTML = `<option value="">All</option>` +
+      sorted.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+    if (sorted.includes(current)) sel.value = current;
+  }
+
+  async function renderMlPerformance() {
+    const tbody = $('mlTbody');
+    try {
+      const rows = await Api.mlPerformance();
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="loading">No data yet.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = rows.map(r => {
+        const total = Number(r.total) || 0;
+        const done  = Number(r.complete) || 0;
+        // "pending" here = anything not COMPLETE (incomplete + invalid + pending)
+        const pending = total - done;
+        const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+        return `
+          <tr>
+            <td>${escapeHtml(r.ml_assigned)}</td>
+            <td class="num">${fmtInt(total)}</td>
+            <td class="num">${fmtInt(done)}</td>
+            <td class="num">${fmtInt(pending)}</td>
+            <td>
+              <div class="progress">
+                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+                <div class="progress-label">${pct}%</div>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="5" class="loading">Error: ${escapeHtml(err.message)}</td></tr>`;
+    }
+  }
+
+  async function renderRecords() {
+    const tbody = $('recordsTbody');
+    tbody.innerHTML = `<tr><td colspan="8" class="loading">Loading...</td></tr>`;
+    try {
+      // Apps Script applies search/municipality/status filters server-side.
+      // Pagination is client-side because the script doesn't paginate.
+      const result = await Api.listRecords({
+        search: state.search,
+        municipality: state.municipality,
+        status: state.status,
+      });
+      const all = (result.data || []).map(normalizeRecord);
+      state.records = all;
+
+      const total = Number(result.total ?? all.length);
+      const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
+      if (state.page > totalPages) state.page = totalPages;
+      const start = (state.page - 1) * state.pageSize;
+      const slice = all.slice(start, start + state.pageSize);
+
+      if (!slice.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="loading">No records found.</td></tr>`;
+      } else {
+        tbody.innerHTML = slice.map(r => `
+          <tr data-id="${escapeHtml(r.id)}">
+            <td class="cell-id" title="${escapeHtml(r.id)}">${escapeHtml(String(r.id).slice(0, 8))}</td>
+            <td>${escapeHtml(r.municipality)}</td>
+            <td>${escapeHtml(r.barangay)}</td>
+            <td>${escapeHtml(r.ml_assigned)}</td>
+            <td>${escapeHtml(r.validated_with_forms)}</td>
+            <td>${escapeHtml(r.updated_in_relic)}</td>
+            <td>${escapeHtml(r.reason_for_not_encoding)}</td>
+            <td><span class="status-pill ${statusClass(r.final_status)}">${escapeHtml(r.final_status)}</span></td>
+          </tr>
+        `).join('');
+      }
+
+      $('paginationInfo').textContent = `Showing ${slice.length} of ${fmtInt(total)} record(s)`;
+      const pageEl = $('pageIndicator'); if (pageEl) pageEl.textContent = `Page ${state.page} of ${totalPages}`;
+      const prev = $('prevPageBtn'); if (prev) prev.disabled = state.page <= 1;
+      const next = $('nextPageBtn'); if (next) next.disabled = state.page >= totalPages;
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="8" class="loading">Error: ${escapeHtml(err.message)}</td></tr>`;
+    }
+  }
+
+  async function refreshAll(showToast = false) {
+    setBanner('warn', 'Loading data from Apps Script...');
+    const ok = await renderSummary();
+    await Promise.all([renderChart(), renderMunicipalitySummary(), renderMlPerformance(), renderRecords()]);
+    setUpdatedAt();
+    if (ok) {
+      setBanner('ok', '');
+      if (showToast) window.Toast?.info('Data refreshed.');
+    } else {
+      setBanner('error', 'Connection failed. Check the Apps Script URL and that the deployment is set to "Anyone".');
+    }
+  }
+
+  function setUpdatedAt() {
+    const el = document.getElementById('updatedAt');
+    if (el) el.textContent = `Last updated: ${new Date().toLocaleString()}`;
+  }
+
+  // ---- events ----
+  function bind() {
+    document.querySelectorAll('.nav-item').forEach(a => {
+      a.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        a.classList.add('active');
+      });
+    });
+    // Read-only: no interactive controls. Navigation links remain.
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    bind();
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => refreshAll(true));
+    }
+    refreshAll();
+    // Auto-refresh every 60 seconds in read-only dashboard
+    setInterval(() => refreshAll(), 60000);
+  });
+})();
+</script>
+</body>
+</html>

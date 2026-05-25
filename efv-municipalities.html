@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EFV — Municipalities Tree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#e9efff;--surface:#ffffff;--surface-2:#f5f8ff;
+  --border:#cfd8e9;--text:#102a43;--text-2:#334e68;--muted:#64748b;
+  --primary:#102a43;--primary-600:#1e3a8a;--primary-50:#dbeafe;
+  --green:#16a34a;--green-50:#ecfdf5;
+  --orange:#c2410c;--orange-50:#fff7ed;
+  --red:#b91c1c;--red-50:#fee2e2;
+  --slate:#475569;--radius:18px;--radius-sm:12px;
+}
+*{box-sizing:border-box}body{font-family:'Manrope',sans-serif;margin:0;background:var(--bg);color:var(--text)}
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.sidebar{background:var(--primary);color:#fff;padding:28px 20px;display:flex;flex-direction:column;gap:26px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary-600));display:grid;place-items:center;font-weight:800}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav-item{padding:10px 12px;border-radius:var(--radius-sm);color:#94a3b8;font-weight:500;text-decoration:none}
+.nav-item:hover{background:rgba(255,255,255,.05);color:#fff}
+.nav-item.active{background:var(--primary-50);color:var(--primary);font-weight:600}
+
+.main{padding:28px 32px 60px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;background:#fff;border-radius:18px;padding:22px 24px;margin-bottom:24px;box-shadow:0 12px 32px rgba(15,23,42,.06)}
+.btn{padding:10px 16px;border-radius:14px;border:1px solid rgba(16,42,67,.12);font-weight:600;background:#fff;color:var(--text);cursor:pointer}
+.btn-primary{background:var(--primary);color:#fff}
+
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 10px 20px rgba(15,23,42,.06)}
+.card-head{padding:16px 20px;border-bottom:1px solid var(--border)}
+.table-wrap{overflow-x:auto}
+.table{width:100%;border-collapse:collapse;font-size:13px}
+.table th,.table td{padding:12px 16px;border-bottom:1px solid var(--border);text-align:left}
+.table th{background:var(--surface-2);color:var(--text-2);font-weight:700;text-transform:uppercase;font-size:11px}
+.num{text-align:right!important;font-variant-numeric:tabular-nums}
+
+.btn-expand{background:none;border:none;color:var(--primary);font-size:12px;cursor:pointer;margin-right:6px}
+.barangay-row{background:var(--surface-2);display:none}
+.barangay-row.show{display:table-row}
+.brgy-list-container{padding:12px 24px;background:#f9fbff}
+.brgy-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));gap:10px}
+.brgy-badge{background:#fff;border:1px solid var(--border);padding:8px 12px;border-radius:8px;display:flex;justify-content:space-between}
+
+.status-pill{padding:2px 6px;border-radius:999px;font-size:11px;font-weight:700}
+.status-complete{background:var(--green-50);color:var(--green)}
+.status-pending{background:var(--red-50);color:var(--red)}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">EF</div><div><strong>Extended Family</strong><div style="font-size:11px;color:#94a3b8">Validation Monitoring</div></div></div>
+    <nav class="nav">
+      <a href="efv-overview.html" class="nav-item">Overview</a>
+      <a href="efv-municipalities.html" class="nav-item active">Municipalities</a>
+      <a href="efv-ml.html" class="nav-item">ML Performance</a>
+      <a href="efv-records.html" class="nav-item">Records</a>
+    </nav>
+    <div style="margin-top:auto;font-size:12px;color:#94a3b8">CBDO · Lio Soliven</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><h2>Municipality & Barangay Breakdown</h2><p style="margin:4px 0 0;color:var(--text-2)">Click the arrow icon to expand and view specific Barangay targets.</p></div>
+      <div><button id="refreshBtn" class="btn btn-primary">Refresh Tree</button><div id="updatedAt" style="font-size:12px;color:var(--muted);margin-top:4px">Last updated: --</div></div>
+    </header>
+
+    <div class="card">
+      <div class="card-head"><strong>Active Operational Summary</strong></div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Municipality</th><th class="num">Total</th><th class="num">Complete</th><th class="num">Incomplete</th><th class="num">Invalid</th><th class="num">Pending</th></tr></thead>
+          <tbody id="municipalityTbody"><tr><td colspan="6">Loading tree parameters...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbxx4y8UYT86Mx4XH5FktCywScAcphlNdCZeHqJ8VZQBh0y4rsPo8SXOMpOpMvc2EDN5_A/exec';
+
+async function loadMunicipalities() {
+  const tbody = document.getElementById('municipalityTbody');
+  try {
+    const res = await fetch(`${API_URL}?action=municipalitySummary`, { method: 'GET', redirect: 'follow' });
+    const body = await res.json();
+    if (!res.ok || body.success === false) throw new Error();
+
+    tbody.innerHTML = body.data.map(r => `
+      <tr class="muni-main-row">
+        <td><button class="btn-expand" data-muni="${r.municipality}">▶</button><strong>${r.municipality}</strong></td>
+        <td class="num">${Number(r.total).toLocaleString()}</td>
+        <td class="num"><span class="status-pill status-complete">${Number(r.complete).toLocaleString()}</span></td>
+        <td class="num" style="color:var(--orange)">${Number(r.incomplete).toLocaleString()}</td>
+        <td class="num" style="color:var(--slate)">${Number(r.invalid).toLocaleString()}</td>
+        <td class="num" style="color:var(--red)">${Number(r.pending).toLocaleString()}</td>
+      </tr>
+      <tr id="brgy-${r.municipality.replace(/\s+/g, '-')}" class="barangay-row">
+        <td colspan="6" class="brgy-list-container"><div class="brgy-grid">Loading cluster entries...</div></td>
+      </tr>
+    `).join('');
+    
+    setupExpandListeners();
+    document.getElementById('updatedAt').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+  } catch(e) { tbody.innerHTML = '<tr><td colspan="6">Failed to bind tree elements.</td></tr>'; }
+}
+
+function setupExpandListeners() {
+  document.querySelectorAll('.btn-expand').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const muni = btn.getAttribute('data-muni');
+      const targetRow = document.getElementById(`brgy-${muni.replace(/\s+/g, '-')}`);
+      const isShowing = targetRow.classList.contains('show');
+
+      if (isShowing) {
+        targetRow.classList.remove('show');
+        btn.textContent = '▶';
+      } else {
+        targetRow.classList.add('show');
+        btn.textContent = '▼';
+        await fetchBarangaysFor(muni, targetRow.querySelector('.brgy-grid'));
+      }
+    });
+  });
+}
+
+async function fetchBarangaysFor(muni, gridContainer) {
+  try {
+    // Queries the global client records array filtered by targeted municipality context
+    const res = await fetch(`${API_URL}?action=records&municipality=${encodeURIComponent(muni)}`, { method: 'GET', redirect: 'follow' });
+    const body = await res.json();
+    if (!body.success) return;
+
+    // Local client-side processing to aggregate values at barangay grain level
+    const brgyMap = {};
+    body.data.forEach(row => {
+      const bName = row.BARANGAY || 'UNASSIGNED';
+      if (!brgyMap[bName]) brgyMap[bName] = { total: 0, done: 0 };
+      brgyMap[bName].total++;
+      if (String(row.FINAL_STATUS).toUpperCase() === 'COMPLETE') brgyMap[bName].done++;
+    });
+
+    gridContainer.innerHTML = Object.entries(brgyMap).map(([name, data]) => `
+      <div class="brgy-badge">
+        <span>📍 ${name}</span>
+        <strong>${data.done}/${data.total} <span class="status-pill status-complete">OK</span></strong>
+      </div>
+    `).join('');
+  } catch (e) { gridContainer.innerHTML = '<span class="muted">Error streaming cluster data.</span>'; }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('refreshBtn').addEventListener('click', loadMunicipalities);
+  loadMunicipalities();
+});
+</script>
+</body>
+</html>
