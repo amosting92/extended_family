@@ -11,7 +11,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
@@ -37,7 +36,6 @@ button{font-family:inherit;cursor:pointer}
 a{color:inherit;text-decoration:none}
 .muted{color:var(--muted)}
 .small{font-size:12px}
-.hidden{display:none!important}
 
 .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
 .sidebar{background:var(--primary);border-right:none;color:#fff;box-shadow:2px 0 25px rgba(15,23,42,.09);padding:28px 20px;display:flex;flex-direction:column;gap:26px;position:sticky;top:0;height:100vh}
@@ -109,20 +107,10 @@ a{color:inherit;text-decoration:none}
 .insight-danger .target-tag {background: rgba(185, 28, 28, 0.08); color: var(--red);}
 .insight-warning .target-tag {background: rgba(194, 65, 12, 0.08); color: var(--orange);}
 
-/* FIXED: PDF Sandbox Engine Positioning 
-  Moved off-screen instead of display:none so html2pdf can render the canvas properly 
-*/
 #pdfHiddenTemplate {
-  position: absolute;
-  top: -9999px;
-  left: -9999px;
-  width: 800px;
-  padding: 40px 50px; 
-  background: #ffffff; 
-  color: #0f172a;
-  font-family: 'Helvetica', 'Arial', sans-serif;
-  font-size: 13px; 
-  line-height: 1.6;
+  position: absolute; top: -9999px; left: -9999px; width: 800px;
+  padding: 40px 50px; background: #ffffff; color: #0f172a;
+  font-family: 'Helvetica', 'Arial', sans-serif; font-size: 13px; line-height: 1.6;
 }
 .pdf-header-block {text-align: center; border-bottom: 3px double #0f172a; padding-bottom: 12px; margin-bottom: 24px;}
 .pdf-title-main {font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;}
@@ -315,7 +303,6 @@ function executeAggregationPipeline() {
   let complete = 0, incomplete = 0, invalid = 0, pending = 0;
 
   workingDataset.forEach(r => {
-    // Null safety check included here for robust processing
     const s = String(r.FINAL_STATUS || '').toUpperCase();
     if (s === 'COMPLETE') complete++;
     else if (s === 'INCOMPLETE') incomplete++;
@@ -426,6 +413,7 @@ function renderRankingsPanel(dataset, muni, worker) {
   }
 }
 
+// 🚀 REFACTORED: Nested Alerts Logic (Municipality -> Top 5 MLs, Geographic -> Muni-Brgy)
 function generateDynamicAlerts(dataset, muni, worker, complete, incomplete, pending, total) {
   const panel = document.getElementById('analysisPanel');
   let html = "";
@@ -434,6 +422,7 @@ function generateDynamicAlerts(dataset, muni, worker, complete, incomplete, pend
   let contextPrefix = "Provincial Level Overview";
   if (muni) contextPrefix = worker ? `Caseworker Focus: ${worker.toUpperCase()}` : `${muni} Cluster Level`;
 
+  // 1. Milestone Target Alert
   if (rate < 50) {
     html += `
       <div class="insight-row insight-danger">
@@ -466,70 +455,107 @@ function generateDynamicAlerts(dataset, muni, worker, complete, incomplete, pend
     `;
   }
 
-  const pendingTargetsSet = new Set();
-  const incompleteTargetsSet = new Set();
-  const localBarangayWeights = {};
+  // Data Grouping Dictionaries
+  const pendingMap = {}; 
+  const incompleteMap = {}; 
+  const brgyMap = {};
 
   dataset.forEach(r => {
     const s = String(r.FINAL_STATUS || '').toUpperCase();
-    const targetItem = worker ? r.BARANGAY : r.ML_ASSIGNED;
-    const bName = r.BARANGAY || 'UNASSIGNED';
+    const m = r.MUNICIPALITY || 'UNKNOWN';
+    const ml = r.ML_ASSIGNED || 'UNASSIGNED';
+    const b = r.BARANGAY || 'UNKNOWN';
+    const bKey = `${m} — ${b}`; // Formatted as "Municipality - Barangay"
 
-    if (s === 'PENDING') pendingTargetsSet.add(targetItem);
-    if (s === 'INCOMPLETE') incompleteTargetsSet.add(targetItem);
+    if (s === 'PENDING') {
+      if (!pendingMap[m]) pendingMap[m] = {};
+      pendingMap[m][ml] = (pendingMap[m][ml] || 0) + 1;
+    }
+    if (s === 'INCOMPLETE') {
+      if (!incompleteMap[m]) incompleteMap[m] = {};
+      incompleteMap[m][ml] = (incompleteMap[m][ml] || 0) + 1;
+    }
     
-    if (!localBarangayWeights[bName]) localBarangayWeights[bName] = { total: 0, complete: 0 };
-    localBarangayWeights[bName].total++;
-    if (s === 'COMPLETE') localBarangayWeights[bName].complete++;
+    if (!brgyMap[bKey]) brgyMap[bKey] = { total: 0, complete: 0 };
+    brgyMap[bKey].total++;
+    if (s === 'COMPLETE') brgyMap[bKey].complete++;
   });
 
+  // Helper Function for Nested Alerts (Muni -> Top 5 MLs)
+  function buildNestedAlert(mapData, icon, title, desc, alertClass) {
+    const muniTotals = [];
+    for (const [mName, mls] of Object.entries(mapData)) {
+      const mTotal = Object.values(mls).reduce((a,b) => a+b, 0);
+      muniTotals.push({ mName, mTotal, mls });
+    }
+    // Get Top 5 Municipalities with highest issue count
+    muniTotals.sort((a,b) => b.mTotal - a.mTotal);
+    const topMunis = muniTotals.slice(0, 5);
+
+    if (topMunis.length === 0) return '';
+
+    let nestedHtml = '';
+    topMunis.forEach(mObj => {
+      // Get Top 5 MLs inside this Municipality
+      const sortedMls = Object.entries(mObj.mls).sort((a,b) => b[1]-a[1]).slice(0, 5);
+      const tags = sortedMls.map(([mlName, count]) => `<span class="target-tag">👤 ${mlName} (${count} cases)</span>`).join('');
+      nestedHtml += `
+        <div style="margin-top: 12px; background: rgba(255,255,255,0.5); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.05);">
+          <div style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 6px;">🏢 ${mObj.mName} Cluster (${mObj.mTotal} Total)</div>
+          <div>${tags}</div>
+        </div>
+      `;
+    });
+
+    return `
+      <div class="insight-row ${alertClass}">
+        <div class="insight-icon">${icon}</div>
+        <div style="flex:1;">
+          <div class="insight-title">${title}</div>
+          <div class="insight-desc">${desc} ${nestedHtml}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 2. Technical Support (PENDING) Alert Block
   if (pending > 0) {
-    const titleText = worker ? "Assigned Barangay Gaps: Field Work Stagnant" : "Technical Support Required: Field Validation Backlogs";
-    const labelPrefix = worker ? "📍 Barangay Area: " : "👤 ML Link Officer: ";
-    const tags = [...pendingTargetsSet].map(t => `<span class="target-tag">${labelPrefix}${String(t).toUpperCase()}</span>`).join('');
-    
-    html += `
-      <div class="insight-row insight-danger">
-        <div class="insight-icon">📌</div>
-        <div>
-          <div class="insight-title">${titleText} (${pending.toLocaleString()} Cases Unvalidated)</div>
-          <div class="insight-desc">These assigned sectors show zero form inputs inside active operational queues. Provide prompt technical assistance to clear these gaps: <div style="margin-top:8px;">${tags}</div></div>
-        </div>
-      </div>
-    `;
+    html += buildNestedAlert(
+      pendingMap, 
+      '📌', 
+      `Technical Support Required: Field Validation Backlogs (${pending.toLocaleString()} Total)`, 
+      `The following clusters and their top caseworkers have the highest volume of unvalidated records:`, 
+      'insight-danger'
+    );
   }
 
+  // 3. System Sync (INCOMPLETE) Alert Block
   if (incomplete > 0) {
-    const titleText = worker ? "RELIC System Missing Entries: Sync Required" : "System Sync Alert: RELIC Processing Backlogs";
-    const labelPrefix = worker ? "📍 Location Sector: " : "👤 Staff Assignment: ";
-    const tags = [...incompleteTargetsSet].map(t => `<span class="target-tag">${labelPrefix}${String(t).toUpperCase()}</span>`).join('');
-    
-    html += `
-      <div class="insight-row insight-warning">
-        <div class="insight-icon">⏳</div>
-        <div>
-          <div class="insight-title">${titleText} (${incomplete.toLocaleString()} items pending sync)</div>
-          <div class="insight-desc">Forms are verified via physical paperwork signatures but missing data integration within the live RELIC console database. Activate data sync sweeps for: <div style="margin-top:8px;">${tags}</div></div>
-        </div>
-      </div>
-    `;
+    html += buildNestedAlert(
+      incompleteMap, 
+      '⏳', 
+      `System Sync Alert: RELIC Processing Backlogs (${incomplete.toLocaleString()} Total)`, 
+      `Forms are verified physically but missing digital system encoding. Top priority sync needed for these staff:`, 
+      'insight-warning'
+    );
   }
 
+  // 4. Geographic Bottlenecks (Municipality - Barangay format) - Hidden if a specific caseworker is selected
   if (!worker) {
-    const slowSectors = Object.entries(localBarangayWeights)
+    const slowSectors = Object.entries(brgyMap)
       .map(([name, d]) => ({ name, total: d.total, done: d.complete, rate: d.total === 0 ? 0 : Math.round((d.complete / d.total) * 100) }))
       .filter(b => b.rate < 45 && b.total >= 2)
       .sort((a,b) => a.rate - b.rate)
-      .slice(0, 4);
+      .slice(0, 5); // Take top 5 lowest
 
     if (slowSectors.length > 0) {
-      const tags = slowSectors.map(b => `<span class="target-tag">📍 ${b.name} (${b.done}/${b.total} Cleared)</span>`).join('');
+      const tags = slowSectors.map(b => `<span class="target-tag" style="margin-bottom: 6px;">📍 ${b.name} (${b.done}/${b.total} Cleared - ${b.rate}%)</span>`).join('');
       html += `
         <div class="insight-row insight-danger">
           <div class="insight-icon">🗺️</div>
           <div>
             <div class="insight-title">Geographic Bottlenecks: Low Baseline Barangay Sectors (Below 45%)</div>
-            <div class="insight-desc">The following locations demonstrate operational data blockages. Prioritize these points for immediate monitoring field audits: <div style="margin-top:8px;">${tags}</div></div>
+            <div class="insight-desc">These exact locations across the scope demonstrate severe operational blockage: <div style="margin-top:10px;">${tags}</div></div>
           </div>
         </div>
       `;
@@ -539,7 +565,6 @@ function generateDynamicAlerts(dataset, muni, worker, complete, incomplete, pend
   panel.innerHTML = html || `<div class="insight-row insight-success"><div class="insight-icon">☀️</div><div><div class="insight-title">Operational Flow Stabilized</div><div class="insight-desc">No anomalous backlogs, validation gaps, or system discrepancies detected in active operational lanes.</div></div></div>`;
 }
 
-// PDF Sandbox Engine
 function compileAndExportOfficialPDF() {
   const btn = document.getElementById('generateMemoBtn');
   const originalText = btn.textContent;
