@@ -37,6 +37,7 @@ button{font-family:inherit;cursor:pointer}
 a{color:inherit;text-decoration:none}
 .muted{color:var(--muted)}
 .small{font-size:12px}
+.hidden{display:none!important}
 
 .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
 .sidebar{background:var(--primary);border-right:none;color:#fff;box-shadow:2px 0 25px rgba(15,23,42,.09);padding:28px 20px;display:flex;flex-direction:column;gap:26px;position:sticky;top:0;height:100vh}
@@ -538,7 +539,7 @@ function generateDynamicAlerts(dataset, muni, worker, complete, incomplete, pend
   panel.innerHTML = html || `<div class="insight-row insight-success"><div class="insight-icon">☀️</div><div><div class="insight-title">Operational Flow Stabilized</div><div class="insight-desc">No anomalous backlogs, validation gaps, or system discrepancies detected in active operational lanes.</div></div></div>`;
 }
 
-// Fixed html2pdf Sandbox Logic
+// PDF Sandbox Engine
 function compileAndExportOfficialPDF() {
   const btn = document.getElementById('generateMemoBtn');
   const originalText = btn.textContent;
@@ -568,7 +569,6 @@ function compileAndExportOfficialPDF() {
   const pctInv = document.getElementById('pctInvalid').textContent;
   const pctP = document.getElementById('pctPending').textContent;
 
-  // Insert to Absolute Positioned Sandbox
   const sandbox = document.getElementById('pdfHiddenTemplate');
   sandbox.innerHTML = `
     <div class="pdf-header-block">
