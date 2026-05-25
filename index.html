@@ -12,18 +12,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root{
---bg:#e9efff;--surface:#ffffff;--surface-2:#f5f8ff;
---border:#cfd8e9;--border-strong:#bac8ff;
---text:#102a43;--text-2:#334e68;--muted:#64748b;
---primary:#102a43;--primary-600:#1e3a8a;--primary-50:#dbeafe;
---green:#16a34a;--green-50:#ecfdf5;
---orange:#c2410c;--orange-50:#fff7ed;
---red:#b91c1c;--red-50:#fee2e2;
---slate:#475569;--slate-50:#f1f5f9;
---radius:18px;--radius-sm:12px;
---shadow-sm:0 10px 20px rgba(15,23,42,.06);
---shadow:0 22px 60px rgba(15,23,42,.09);
---ease:cubic-bezier(.4,0,.2,1);
+  --bg:#e9efff;--surface:#ffffff;--surface-2:#f5f8ff;
+  --border:#cfd8e9;--border-strong:#bac8ff;
+  --text:#102a43;--text-2:#334e68;--muted:#64748b;
+  --primary:#102a43;--primary-600:#1e3a8a;--primary-50:#dbeafe;
+  --green:#16a34a;--green-50:#ecfdf5;
+  --orange:#c2410c;--orange-50:#fff7ed;
+  --red:#b91c1c;--red-50:#fee2e2;
+  --slate:#475569;--slate-50:#f1f5f9;
+  --radius:18px;--radius-sm:12px;
+  --shadow-sm:0 10px 20px rgba(15,23,42,.06);
+  --shadow:0 22px 60px rgba(15,23,42,.09);
+  --ease:cubic-bezier(.4,0,.2,1);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;overflow-x:hidden}
@@ -34,7 +34,7 @@ a{color:inherit;text-decoration:none}
 .muted{color:var(--muted)}
 .small{font-size:12px}
 .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
-.sidebar{background:var(--primary);border-right:none;color:#fff;box-shadow:2px 0 25px rgba(15,23,42,.09);padding:28px 20px;display:flex;flex-direction:column;gap:26px;position:sticky;top:0;height:100vh}
+.sidebar{background:var(--primary);color:#fff;box-shadow:2px 0 25px rgba(15,23,42,.09);padding:28px 20px;display:flex;flex-direction:column;gap:26px;position:sticky;top:0;height:100vh}
 .brand{display:flex;align-items:center;gap:12px;padding:0 8px}
 .brand-mark{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary-600));color:#fff;display:grid;place-items:center;font-weight:800;letter-spacing:.5px;box-shadow:var(--shadow)}
 .brand-title{font-weight:700;font-size:15px}
@@ -83,21 +83,21 @@ a{color:inherit;text-decoration:none}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:24px}
 .card-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px}
 .card-title{font-size:15px}
-.analysis-panel {padding: 20px; display: flex; flex-direction: column; gap: 14px;}
-.insight-row {display: flex; align-items: flex-start; gap: 14px; padding: 14px; border-radius: 12px; border-left: 4px solid var(--border);}
-.insight-danger {background: var(--red-50); border-left-color: var(--red); color: #7f1d1d;}
-.insight-warning {background: var(--orange-50); border-left-color: var(--orange); color: #7c2d12;}
-.insight-success {background: var(--green-50); border-left-color: var(--green); color: #064e3b;}
-.insight-icon {font-size: 20px; line-height: 1; margin-top: 2px;}
-.insight-title {font-weight: 700; font-size: 14px; margin-bottom: 4px;}
-.insight-desc {font-size: 13px; opacity: 0.95; line-height: 1.5;}
-.target-tag {display: inline-block; background: rgba(15, 23, 42, 0.06); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 11px; font-weight: 700; margin: 2px 4px 2px 0;}
-.insight-danger .target-tag {background: rgba(185, 28, 28, 0.08); color: var(--red);}
-.insight-warning .target-tag {background: rgba(194, 65, 12, 0.08); color: var(--orange);}
-@media (max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
-@media (max-width:1024px){.grid-2{grid-template-columns:1fr}}
-@media (max-width:820px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto;flex-direction:row;padding:12px 16px}.sidebar-foot{display:none}.nav{flex-direction:row}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:560px){.kpi-grid{grid-template-columns:1fr}.filter-row-fields{min-width:100%}}
+.analysis-panel{padding:20px;display:flex;flex-direction:column;gap:14px}
+.insight-row{display:flex;align-items:flex-start;gap:14px;padding:14px;border-radius:12px;border-left:4px solid var(--border)}
+.insight-danger{background:var(--red-50);border-left-color:var(--red);color:#7f1d1d}
+.insight-warning{background:var(--orange-50);border-left-color:var(--orange);color:#7c2d12}
+.insight-success{background:var(--green-50);border-left-color:var(--green);color:#064e3b}
+.insight-icon{font-size:20px;line-height:1;margin-top:2px}
+.insight-title{font-weight:700;font-size:14px;margin-bottom:4px}
+.insight-desc{font-size:13px;opacity:.95;line-height:1.5}
+.target-tag{display:inline-block;background:rgba(15,23,42,.06);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:11px;font-weight:700;margin:2px 4px 2px 0}
+.insight-danger .target-tag{background:rgba(185,28,28,.08);color:var(--red)}
+.insight-warning .target-tag{background:rgba(194,65,12,.08);color:var(--orange)}
+@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:1024px){.grid-2{grid-template-columns:1fr}}
+@media(max-width:820px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto;flex-direction:row;padding:12px 16px}.sidebar-foot{display:none}.nav{flex-direction:row}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.kpi-grid{grid-template-columns:1fr}.filter-row-fields{min-width:100%}}
 </style>
 </head>
 <body>
@@ -125,7 +125,7 @@ a{color:inherit;text-decoration:none}
         <h1 class="page-title">Operational Control Board</h1>
         <p class="page-sub muted">Cascading data filtration matrix dashboard for targeted caseworker evaluations.</p>
       </div>
-      <div id="updatedAt" class="muted small" style="text-align: right; font-weight: 600;">Syncing baseline...</div>
+      <div id="updatedAt" class="muted small" style="text-align:right;font-weight:600;">Syncing baseline...</div>
     </header>
 
     <div class="control-panel">
@@ -158,22 +158,22 @@ a{color:inherit;text-decoration:none}
       <div class="kpi-card kpi-green">
         <div class="small muted font-weight-bold">COMPLETE</div>
         <div class="kpi-value" id="kpiComplete">--</div>
-        <div class="kpi-pct-subtext" style="color:var(--green);" id="pctComplete">--% share</div>
+        <div class="kpi-pct-subtext" style="color:var(--green)" id="pctComplete">--% share</div>
       </div>
       <div class="kpi-card kpi-orange">
         <div class="small muted font-weight-bold">INCOMPLETE</div>
         <div class="kpi-value" id="kpiIncomplete">--</div>
-        <div class="kpi-pct-subtext" style="color:var(--orange);" id="pctIncomplete">--% share</div>
+        <div class="kpi-pct-subtext" style="color:var(--orange)" id="pctIncomplete">--% share</div>
       </div>
       <div class="kpi-card kpi-slate">
         <div class="small muted font-weight-bold">INVALID</div>
         <div class="kpi-value" id="kpiInvalid">--</div>
-        <div class="kpi-pct-subtext" style="color:var(--slate);" id="pctInvalid">--% share</div>
+        <div class="kpi-pct-subtext" style="color:var(--slate)" id="pctInvalid">--% share</div>
       </div>
       <div class="kpi-card kpi-red">
         <div class="small muted font-weight-bold">PENDING</div>
         <div class="kpi-value" id="kpiPending">--</div>
-        <div class="kpi-pct-subtext" style="color:var(--red);" id="pctPending">--% share</div>
+        <div class="kpi-pct-subtext" style="color:var(--red)" id="pctPending">--% share</div>
       </div>
     </div>
 
@@ -207,10 +207,12 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbxx4y8UYT86Mx4XH5FktCyw
 let centralRecordsCache = [];
 let activeChartInstance = null;
 
+// ── DASHBOARD ENGINE (original, unchanged) ────────────────────────────────────
+
 async function syncControlDashboard() {
   try {
-    document.getElementById('updatedAt').textContent = "Synchronizing live database stream...";
-    const res  = await fetch(`${API_URL}?action=records`, { method: 'GET', redirect: 'follow' });
+    document.getElementById('updatedAt').textContent = 'Synchronizing live database stream...';
+    const res  = await fetch(`${API_URL}?action=records`, { method:'GET', redirect:'follow' });
     const body = await res.json();
     if (!res.ok || body.success === false) throw new Error();
     centralRecordsCache = body.data || [];
@@ -218,18 +220,18 @@ async function syncControlDashboard() {
     executeAggregationPipeline();
     document.getElementById('updatedAt').textContent = `Last synchronized: ${new Date().toLocaleTimeString()}`;
   } catch(e) {
-    document.getElementById('updatedAt').textContent = "Database sync dropped.";
+    document.getElementById('updatedAt').textContent = 'Database sync dropped.';
   }
 }
 
 function populateMuniDropdown() {
-  const muniSelector     = document.getElementById('muniSelector');
-  const currentSelection = muniSelector.value;
-  const municipalities   = [...new Set(centralRecordsCache.map(r => r.MUNICIPALITY))].filter(Boolean).sort();
-  muniSelector.innerHTML = '<option value="">PROVINCIAL OVERVIEW (All Palawan Locations)</option>' +
-    municipalities.map(m => `<option value="${m}">${m.toUpperCase()} CLUSTER LEVEL</option>`).join('');
-  if (municipalities.includes(currentSelection)) {
-    muniSelector.value = currentSelection;
+  const sel = document.getElementById('muniSelector');
+  const cur = sel.value;
+  const munis = [...new Set(centralRecordsCache.map(r => r.MUNICIPALITY))].filter(Boolean).sort();
+  sel.innerHTML = '<option value="">PROVINCIAL OVERVIEW (All Palawan Locations)</option>' +
+    munis.map(m => `<option value="${m}">${m.toUpperCase()} CLUSTER LEVEL</option>`).join('');
+  if (munis.includes(cur)) {
+    sel.value = cur;
   } else {
     document.getElementById('caseworkerSelector').disabled = true;
     document.getElementById('caseworkerSelector').innerHTML = '<option value="">Select Municipality Level First...</option>';
@@ -237,35 +239,25 @@ function populateMuniDropdown() {
 }
 
 function updateCaseworkerDropdown() {
-  const selectedMuni      = document.getElementById('muniSelector').value;
-  const caseworkerSelector = document.getElementById('caseworkerSelector');
-  if (!selectedMuni) {
-    caseworkerSelector.disabled = true;
-    caseworkerSelector.innerHTML = '<option value="">Select Municipality Level First...</option>';
-    return;
-  }
-  const localMuniRecords = centralRecordsCache.filter(r => r.MUNICIPALITY === selectedMuni);
-  const localMls         = [...new Set(localMuniRecords.map(r => r.ML_ASSIGNED))].filter(Boolean).sort();
-  caseworkerSelector.disabled = false;
-  caseworkerSelector.innerHTML = '<option value="">ALL CASEWORKER ASSIGNMENTS (Cluster Summary)</option>' +
-    localMls.map(ml => `<option value="${ml}">👤 ML LINK: ${ml.toUpperCase()}</option>`).join('');
+  const muni = document.getElementById('muniSelector').value;
+  const csel = document.getElementById('caseworkerSelector');
+  if (!muni) { csel.disabled = true; csel.innerHTML = '<option value="">Select Municipality Level First...</option>'; return; }
+  const mls = [...new Set(centralRecordsCache.filter(r => r.MUNICIPALITY === muni).map(r => r.ML_ASSIGNED))].filter(Boolean).sort();
+  csel.disabled = false;
+  csel.innerHTML = '<option value="">ALL CASEWORKER ASSIGNMENTS (Cluster Summary)</option>' +
+    mls.map(ml => `<option value="${ml}">👤 ML LINK: ${ml.toUpperCase()}</option>`).join('');
 }
 
 function executeAggregationPipeline() {
-  const muniFocus    = document.getElementById('muniSelector').value;
-  const workerFocus  = document.getElementById('caseworkerSelector').value;
-  let workingDataset = centralRecordsCache;
+  const muniFocus   = document.getElementById('muniSelector').value;
+  const workerFocus = document.getElementById('caseworkerSelector').value;
+  let ds = centralRecordsCache;
+  if (muniFocus)   ds = ds.filter(r => r.MUNICIPALITY === muniFocus);
+  if (workerFocus) ds = ds.filter(r => r.ML_ASSIGNED  === workerFocus);
 
-  if (muniFocus) {
-    workingDataset = workingDataset.filter(r => r.MUNICIPALITY === muniFocus);
-    if (workerFocus) {
-      workingDataset = workingDataset.filter(r => r.ML_ASSIGNED === workerFocus);
-    }
-  }
-
-  const total = workingDataset.length;
+  const total = ds.length;
   let complete = 0, incomplete = 0, invalid = 0, pending = 0;
-  workingDataset.forEach(r => {
+  ds.forEach(r => {
     const s = String(r.FINAL_STATUS || '').toUpperCase();
     if      (s === 'COMPLETE')   complete++;
     else if (s === 'INCOMPLETE') incomplete++;
@@ -278,15 +270,15 @@ function executeAggregationPipeline() {
   document.getElementById('kpiIncomplete').textContent = incomplete.toLocaleString();
   document.getElementById('kpiInvalid').textContent    = invalid.toLocaleString();
   document.getElementById('kpiPending').textContent    = pending.toLocaleString();
-  document.getElementById('pctComplete').textContent   = `${total === 0 ? 0 : ((complete   / total) * 100).toFixed(1)}% of scope`;
-  document.getElementById('pctIncomplete').textContent = `${total === 0 ? 0 : ((incomplete / total) * 100).toFixed(1)}% of scope`;
-  document.getElementById('pctInvalid').textContent    = `${total === 0 ? 0 : ((invalid    / total) * 100).toFixed(1)}% of scope`;
-  document.getElementById('pctPending').textContent    = `${total === 0 ? 0 : ((pending    / total) * 100).toFixed(1)}% of scope`;
-  document.getElementById('subTotal').textContent      = (muniFocus || workerFocus) ? 'Isolate dataset metrics' : '100% scope volume';
+  document.getElementById('pctComplete').textContent   = `${total===0?0:((complete/total)*100).toFixed(1)}% of scope`;
+  document.getElementById('pctIncomplete').textContent = `${total===0?0:((incomplete/total)*100).toFixed(1)}% of scope`;
+  document.getElementById('pctInvalid').textContent    = `${total===0?0:((invalid/total)*100).toFixed(1)}% of scope`;
+  document.getElementById('pctPending').textContent    = `${total===0?0:((pending/total)*100).toFixed(1)}% of scope`;
+  document.getElementById('subTotal').textContent      = (muniFocus||workerFocus) ? 'Isolate dataset metrics' : '100% scope volume';
 
   renderDoughnutChart(complete, incomplete, invalid, pending);
-  renderRankingsPanel(workingDataset, muniFocus, workerFocus);
-  generateDynamicAlerts(workingDataset, muniFocus, workerFocus, complete, incomplete, pending, total);
+  renderRankingsPanel(ds, muniFocus, workerFocus);
+  generateDynamicAlerts(ds, muniFocus, workerFocus, complete, incomplete, pending, total);
 }
 
 function renderDoughnutChart(c, inc, inv, p) {
@@ -296,22 +288,21 @@ function renderDoughnutChart(c, inc, inv, p) {
   activeChartInstance = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['COMPLETE', 'INCOMPLETE', 'INVALID', 'PENDING'],
-      datasets: [{ data: [c, inc, inv, p], backgroundColor: ['#16a34a','#ea580c','#475569','#dc2626'], borderColor: '#fff', borderWidth: 2 }]
+      labels: ['COMPLETE','INCOMPLETE','INVALID','PENDING'],
+      datasets: [{ data:[c,inc,inv,p], backgroundColor:['#16a34a','#ea580c','#475569','#dc2626'], borderColor:'#fff', borderWidth:2 }]
     },
     options: {
-      responsive: true, maintainAspectRatio: false, cutout: '55%',
+      responsive:true, maintainAspectRatio:false, cutout:'55%',
       plugins: {
-        legend: { position: 'bottom', labels: { font: { family: 'Manrope', size: 11, weight: '600' }, boxWidth: 10, padding: 12 } },
+        legend: { position:'bottom', labels:{ font:{family:'Manrope',size:11,weight:'600'}, boxWidth:10, padding:12 } },
         datalabels: {
-          color: '#ffffff', font: { family: 'Manrope', weight: '800', size: 11 },
-          backgroundColor: 'rgba(15,23,42,0.75)', borderRadius: 6, padding: 6,
-          formatter: (value) => {
-            if (value === 0 || totalSum === 0) return null;
-            const pct = ((value / totalSum) * 100).toFixed(1);
-            return `${value.toLocaleString()}\n(${pct}%)`;
+          color:'#ffffff', font:{family:'Manrope',weight:'800',size:11},
+          backgroundColor:'rgba(15,23,42,0.75)', borderRadius:6, padding:6,
+          formatter:(value) => {
+            if (value===0||totalSum===0) return null;
+            return `${value.toLocaleString()}\n(${((value/totalSum)*100).toFixed(1)}%)`;
           },
-          align: 'center', anchor: 'center', textAlign: 'center'
+          align:'center', anchor:'center', textAlign:'center'
         }
       }
     }
@@ -322,482 +313,404 @@ function renderRankingsPanel(dataset, muni, worker) {
   const container = document.getElementById('rankingContainer');
   const cardTitle = document.getElementById('rankingCardTitle');
 
-  if (!muni) {
-    cardTitle.textContent = "Municipality Rankings (Top 5 Allocation Tracks)";
-    const muniGroups = {};
+  const buildBlocks = (groups, topHdr, botHdr) => {
+    const top    = [...groups].sort((a,b)=>b.rate-a.rate).slice(0,5);
+    const bottom = [...groups].sort((a,b)=>a.rate-b.rate).slice(0,5);
+    const row = (m,i) => `<li class="rank-item"><span><span class="rank-badge">#${i+1}</span> ${m.name}</span><span class="rank-rate">${m.rate}%</span></li>`;
+    return `
+      <div class="rank-block"><div class="rank-header">👑 ${topHdr}</div><ul class="rank-list">${top.map(row).join('')}</ul></div>
+      <div class="rank-block rank-low"><div class="rank-header">⚠️ ${botHdr}</div><ul class="rank-list">${bottom.map(row).join('')}</ul></div>`;
+  };
+
+  const makeGroups = (field) => {
+    const g = {};
     dataset.forEach(r => {
-      const mName = r.MUNICIPALITY || 'UNKNOWN';
-      if (!muniGroups[mName]) muniGroups[mName] = { total: 0, complete: 0 };
-      muniGroups[mName].total++;
-      if (String(r.FINAL_STATUS || '').toUpperCase() === 'COMPLETE') muniGroups[mName].complete++;
+      const k = r[field]||'UNKNOWN';
+      if(!g[k]) g[k]={total:0,complete:0};
+      g[k].total++;
+      if(String(r.FINAL_STATUS||'').toUpperCase()==='COMPLETE') g[k].complete++;
     });
-    const metrics = Object.entries(muniGroups).map(([name, data]) => ({ name, rate: data.total === 0 ? 0 : Math.round((data.complete / data.total) * 100) }));
-    const top    = [...metrics].sort((a,b) => b.rate - a.rate).slice(0, 5);
-    const bottom = [...metrics].sort((a,b) => a.rate - b.rate).slice(0, 5);
-    container.innerHTML = `
-      <div class="rank-block">
-        <div class="rank-header">👑 Highest Completion (Municipal Scale)</div>
-        <ul class="rank-list">${top.map((m,i) => `<li class="rank-item"><span><span class="rank-badge">#${i+1}</span> ${m.name}</span><span class="rank-rate">${m.rate}%</span></li>`).join('')}</ul>
-      </div>
-      <div class="rank-block rank-low">
-        <div class="rank-header">⚠️ Lowest Completion (Municipal Scale)</div>
-        <ul class="rank-list">${bottom.map((m,i) => `<li class="rank-item"><span><span class="rank-badge">#${i+1}</span> ${m.name}</span><span class="rank-rate">${m.rate}%</span></li>`).join('')}</ul>
-      </div>`;
+    return Object.entries(g).map(([name,d])=>({name,rate:d.total===0?0:Math.round((d.complete/d.total)*100)}));
+  };
+
+  if (!muni) {
+    cardTitle.textContent = 'Municipality Rankings (Top 5 Allocation Tracks)';
+    container.innerHTML = buildBlocks(makeGroups('MUNICIPALITY'), 'Highest Completion (Municipal Scale)', 'Lowest Completion (Municipal Scale)');
   } else {
     cardTitle.textContent = worker ? `Caseworker: ${worker.toUpperCase()} — Barangay Breakdown` : `${muni} Cluster: Barangay Performance Rankings`;
-    const brgyGroups = {};
-    dataset.forEach(r => {
-      const bName = r.BARANGAY || 'UNKNOWN';
-      if (!brgyGroups[bName]) brgyGroups[bName] = { total: 0, complete: 0 };
-      brgyGroups[bName].total++;
-      if (String(r.FINAL_STATUS || '').toUpperCase() === 'COMPLETE') brgyGroups[bName].complete++;
-    });
-    const metrics = Object.entries(brgyGroups).map(([name, data]) => ({ name, rate: data.total === 0 ? 0 : Math.round((data.complete / data.total) * 100) }));
-    const top    = [...metrics].sort((a,b) => b.rate - a.rate).slice(0, 5);
-    const bottom = [...metrics].sort((a,b) => a.rate - b.rate).slice(0, 5);
-    container.innerHTML = `
-      <div class="rank-block">
-        <div class="rank-header">👑 Highest Completion (Barangay Level)</div>
-        <ul class="rank-list">${top.map((m,i) => `<li class="rank-item"><span><span class="rank-badge">#${i+1}</span> ${m.name}</span><span class="rank-rate">${m.rate}%</span></li>`).join('')}</ul>
-      </div>
-      <div class="rank-block rank-low">
-        <div class="rank-header">⚠️ Lowest Completion (Barangay Level)</div>
-        <ul class="rank-list">${bottom.map((m,i) => `<li class="rank-item"><span><span class="rank-badge">#${i+1}</span> ${m.name}</span><span class="rank-rate">${m.rate}%</span></li>`).join('')}</ul>
-      </div>`;
+    container.innerHTML = buildBlocks(makeGroups('BARANGAY'), 'Highest Completion (Barangay Level)', 'Lowest Completion (Barangay Level)');
   }
 }
 
 function generateDynamicAlerts(dataset, muni, worker, complete, incomplete, pending, total) {
   const panel = document.getElementById('analysisPanel');
-  let html    = "";
-  const rate  = total === 0 ? 0 : ((complete / total) * 100).toFixed(1);
-  let contextPrefix = "Provincial Level Overview";
-  if (muni) contextPrefix = worker ? `Caseworker Focus: ${worker.toUpperCase()}` : `${muni} Cluster Level`;
+  let html    = '';
+  const rate  = total===0?0:((complete/total)*100).toFixed(1);
+  let ctx     = 'Provincial Level Overview';
+  if (muni) ctx = worker ? `Caseworker Focus: ${worker.toUpperCase()}` : `${muni} Cluster Level`;
 
-  if (rate < 50) {
-    html += `
-      <div class="insight-row insight-danger">
-        <div class="insight-icon">🚨</div>
-        <div>
-          <div class="insight-title">${contextPrefix}: Critical Velocity Warning (${rate}%)</div>
-          <div class="insight-desc">Operational output bounds are tracking heavily behind schedule limits. Strict monitoring and technical assistance workflows should be activated immediately.</div>
-        </div>
-      </div>`;
-  } else if (rate >= 50 && rate < 85) {
-    html += `
-      <div class="insight-row insight-warning">
-        <div class="insight-icon">⚠️</div>
-        <div>
-          <div class="insight-title">${contextPrefix}: Moderate Progress Output Grid (${rate}%)</div>
-          <div class="insight-desc">Pacing configurations are stable. Direct support parameters toward active data backlogs to complete clearance targets safely.</div>
-        </div>
-      </div>`;
-  } else {
-    html += `
-      <div class="insight-row insight-success">
-        <div class="insight-icon">✅</div>
-        <div>
-          <div class="insight-title">${contextPrefix}: High Operations Compliance (${rate}%)</div>
-          <div class="insight-desc">Excellent tracking turnaround. Current processing lines demonstrate highly effective field velocity profiles.</div>
-        </div>
-      </div>`;
-  }
+  if      (rate < 50) html += `<div class="insight-row insight-danger"><div class="insight-icon">🚨</div><div><div class="insight-title">${ctx}: Critical Velocity Warning (${rate}%)</div><div class="insight-desc">Operational output bounds are tracking heavily behind schedule limits. Strict monitoring and technical assistance workflows should be activated immediately.</div></div></div>`;
+  else if (rate < 85) html += `<div class="insight-row insight-warning"><div class="insight-icon">⚠️</div><div><div class="insight-title">${ctx}: Moderate Progress Output Grid (${rate}%)</div><div class="insight-desc">Pacing configurations are stable. Direct support parameters toward active data backlogs to complete clearance targets safely.</div></div></div>`;
+  else                html += `<div class="insight-row insight-success"><div class="insight-icon">✅</div><div><div class="insight-title">${ctx}: High Operations Compliance (${rate}%)</div><div class="insight-desc">Excellent tracking turnaround. Current processing lines demonstrate highly effective field velocity profiles.</div></div></div>`;
 
-  const pendingMap    = {};
-  const incompleteMap = {};
-  const brgyMap       = {};
-
+  const pendingMap={}, incompleteMap={}, brgyMap={};
   dataset.forEach(r => {
-    const s    = String(r.FINAL_STATUS || '').toUpperCase();
-    const m    = r.MUNICIPALITY || 'UNKNOWN';
-    const ml   = r.ML_ASSIGNED  || 'UNASSIGNED';
-    const b    = r.BARANGAY     || 'UNKNOWN';
-    const bKey = `${m} — ${b}`;
-    if (s === 'PENDING') {
-      if (!pendingMap[m]) pendingMap[m] = {};
-      pendingMap[m][ml] = (pendingMap[m][ml] || 0) + 1;
-    }
-    if (s === 'INCOMPLETE') {
-      if (!incompleteMap[m]) incompleteMap[m] = {};
-      incompleteMap[m][ml] = (incompleteMap[m][ml] || 0) + 1;
-    }
-    if (!brgyMap[bKey]) brgyMap[bKey] = { total: 0, complete: 0 };
+    const s=String(r.FINAL_STATUS||'').toUpperCase(), m=r.MUNICIPALITY||'UNKNOWN', ml=r.ML_ASSIGNED||'UNASSIGNED', bKey=`${m} — ${r.BARANGAY||'UNKNOWN'}`;
+    if(s==='PENDING')    { if(!pendingMap[m])    pendingMap[m]={};    pendingMap[m][ml]    =(pendingMap[m][ml]||0)+1; }
+    if(s==='INCOMPLETE') { if(!incompleteMap[m]) incompleteMap[m]={}; incompleteMap[m][ml] =(incompleteMap[m][ml]||0)+1; }
+    if(!brgyMap[bKey]) brgyMap[bKey]={total:0,complete:0};
     brgyMap[bKey].total++;
-    if (s === 'COMPLETE') brgyMap[bKey].complete++;
+    if(s==='COMPLETE') brgyMap[bKey].complete++;
   });
 
-  function buildNestedAlert(mapData, icon, title, desc, alertClass) {
-    const muniTotals = [];
-    for (const [mName, mls] of Object.entries(mapData)) {
-      const mTotal = Object.values(mls).reduce((a,b) => a+b, 0);
-      muniTotals.push({ mName, mTotal, mls });
-    }
-    muniTotals.sort((a,b) => b.mTotal - a.mTotal);
-    const topMunis = muniTotals.slice(0, 5);
-    if (topMunis.length === 0) return '';
-    let nestedHtml = '';
-    topMunis.forEach(mObj => {
-      const sortedMls = Object.entries(mObj.mls).sort((a,b) => b[1]-a[1]).slice(0, 5);
-      const tags = sortedMls.map(([mlName, count]) => `<span class="target-tag">👤 ${mlName} (${count} cases)</span>`).join('');
-      nestedHtml += `
-        <div style="margin-top: 12px; background: rgba(255,255,255,0.5); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.05);">
-          <div style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 6px;">🏢 ${mObj.mName} Cluster (${mObj.mTotal} Total)</div>
-          <div>${tags}</div>
-        </div>`;
+  function buildNestedAlert(mapData, icon, title, desc, cls) {
+    const muniTotals=[];
+    for(const[mName,mls]of Object.entries(mapData)){ const mTotal=Object.values(mls).reduce((a,b)=>a+b,0); muniTotals.push({mName,mTotal,mls}); }
+    muniTotals.sort((a,b)=>b.mTotal-a.mTotal);
+    if(!muniTotals.length) return '';
+    let nested='';
+    muniTotals.slice(0,5).forEach(mObj=>{
+      const tags=Object.entries(mObj.mls).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([mlName,count])=>`<span class="target-tag">👤 ${mlName} (${count} cases)</span>`).join('');
+      nested+=`<div style="margin-top:12px;background:rgba(255,255,255,0.5);padding:10px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.05);"><div style="font-size:11px;font-weight:800;color:var(--primary);text-transform:uppercase;margin-bottom:6px;">🏢 ${mObj.mName} Cluster (${mObj.mTotal} Total)</div><div>${tags}</div></div>`;
     });
-    return `
-      <div class="insight-row ${alertClass}">
-        <div class="insight-icon">${icon}</div>
-        <div style="flex:1;">
-          <div class="insight-title">${title}</div>
-          <div class="insight-desc">${desc} ${nestedHtml}</div>
-        </div>
-      </div>`;
+    return `<div class="insight-row ${cls}"><div class="insight-icon">${icon}</div><div style="flex:1"><div class="insight-title">${title}</div><div class="insight-desc">${desc}${nested}</div></div></div>`;
   }
 
-  if (pending > 0) {
-    html += buildNestedAlert(
-      pendingMap, '📌',
-      `Technical Support Required: Field Validation Backlogs (${pending.toLocaleString()} Total)`,
-      `The following clusters and their top caseworkers have the highest volume of unvalidated records:`,
-      'insight-danger'
-    );
-  }
-
-  if (incomplete > 0) {
-    html += buildNestedAlert(
-      incompleteMap, '⏳',
-      `System Sync Alert: RELIC Processing Backlogs (${incomplete.toLocaleString()} Total)`,
-      `Forms are verified physically but missing digital system encoding. Top priority sync needed for these staff:`,
-      'insight-warning'
-    );
-  }
+  if(pending>0)    html+=buildNestedAlert(pendingMap,    '📌',`Technical Support Required: Field Validation Backlogs (${pending.toLocaleString()} Total)`,    'The following clusters and their top caseworkers have the highest volume of unvalidated records:','insight-danger');
+  if(incomplete>0) html+=buildNestedAlert(incompleteMap, '⏳',`System Sync Alert: RELIC Processing Backlogs (${incomplete.toLocaleString()} Total)`, 'Forms are verified physically but missing digital system encoding. Top priority sync needed for these staff:','insight-warning');
 
   if (!worker) {
-    const slowSectors = Object.entries(brgyMap)
-      .map(([name, d]) => ({ name, total: d.total, done: d.complete, rate: d.total === 0 ? 0 : Math.round((d.complete / d.total) * 100) }))
-      .filter(b => b.rate < 45 && b.total >= 2)
-      .sort((a,b) => a.rate - b.rate)
-      .slice(0, 5);
-    if (slowSectors.length > 0) {
-      const tags = slowSectors.map(b => `<span class="target-tag" style="margin-bottom: 6px;">📍 ${b.name} (${b.done}/${b.total} Cleared - ${b.rate}%)</span>`).join('');
-      html += `
-        <div class="insight-row insight-danger">
-          <div class="insight-icon">🗺️</div>
-          <div>
-            <div class="insight-title">Geographic Bottlenecks: Low Baseline Barangay Sectors (Below 45%)</div>
-            <div class="insight-desc">These exact locations across the scope demonstrate severe operational blockage: <div style="margin-top:10px;">${tags}</div></div>
-          </div>
-        </div>`;
+    const slow=Object.entries(brgyMap).map(([name,d])=>({name,total:d.total,done:d.complete,rate:d.total===0?0:Math.round((d.complete/d.total)*100)})).filter(b=>b.rate<45&&b.total>=2).sort((a,b)=>a.rate-b.rate).slice(0,5);
+    if(slow.length>0){
+      const tags=slow.map(b=>`<span class="target-tag" style="margin-bottom:6px;">📍 ${b.name} (${b.done}/${b.total} Cleared - ${b.rate}%)</span>`).join('');
+      html+=`<div class="insight-row insight-danger"><div class="insight-icon">🗺️</div><div><div class="insight-title">Geographic Bottlenecks: Low Baseline Barangay Sectors (Below 45%)</div><div class="insight-desc">These exact locations across the scope demonstrate severe operational blockage:<div style="margin-top:10px;">${tags}</div></div></div></div>`;
     }
   }
 
-  panel.innerHTML = html || `
-    <div class="insight-row insight-success">
-      <div class="insight-icon">☀️</div>
-      <div>
-        <div class="insight-title">Operational Flow Stabilized</div>
-        <div class="insight-desc">No anomalous backlogs, validation gaps, or system discrepancies detected in active operational lanes.</div>
-      </div>
-    </div>`;
+  panel.innerHTML = html || `<div class="insight-row insight-success"><div class="insight-icon">☀️</div><div><div class="insight-title">Operational Flow Stabilized</div><div class="insight-desc">No anomalous backlogs, validation gaps, or system discrepancies detected in active operational lanes.</div></div></div>`;
 }
 
 
-// =======================================================================
-//  PDF EXPORT ENGINE v2.0 — FULL OPERATIONAL REPORT EXPORTER
-//  Replaces original compileAndExportOfficialPDF() + helpers
-// =======================================================================
+// ── PDF EXPORT ENGINE v3.0 — FULL 5-SECTION RULE-BASED REPORT ────────────────
+// Pure rule-based logic from centralRecordsCache. No external API needed.
+// ─────────────────────────────────────────────────────────────────────────────
 
-// HELPER 1: Resolve current filter state into labels + filename
+// UTIL: Get filtered dataset matching current selector state
+function pdf_getFilteredDataset() {
+  const muni   = document.getElementById('muniSelector').value;
+  const worker = document.getElementById('caseworkerSelector').value;
+  let ds = centralRecordsCache;
+  if (muni)   ds = ds.filter(r => r.MUNICIPALITY === muni);
+  if (worker) ds = ds.filter(r => r.ML_ASSIGNED  === worker);
+  return ds;
+}
+
+// UTIL: Compute status counts + completion rate
+function pdf_computeStats(ds) {
+  const total = ds.length;
+  let complete=0, incomplete=0, invalid=0, pending=0;
+  ds.forEach(r => {
+    const s = String(r.FINAL_STATUS||'').toUpperCase();
+    if      (s==='COMPLETE')   complete++;
+    else if (s==='INCOMPLETE') incomplete++;
+    else if (s==='INVALID')    invalid++;
+    else                       pending++;
+  });
+  return { total, complete, incomplete, invalid, pending, rate: total===0?0:(complete/total)*100 };
+}
+
+// UTIL: Group by field and return array with stats per group
+function pdf_groupByField(ds, field) {
+  const g = {};
+  ds.forEach(r => {
+    const k = (r[field]||'UNKNOWN').trim();
+    if(!g[k]) g[k]={total:0,complete:0,incomplete:0,invalid:0,pending:0};
+    g[k].total++;
+    const s=String(r.FINAL_STATUS||'').toUpperCase();
+    if(s==='COMPLETE') g[k].complete++;
+    else if(s==='INCOMPLETE') g[k].incomplete++;
+    else if(s==='INVALID') g[k].invalid++;
+    else g[k].pending++;
+  });
+  return Object.entries(g).map(([name,d])=>({name,...d,rate:d.total===0?0:Math.round((d.complete/d.total)*100)}));
+}
+
+// UTIL: Build context meta from selectors
 function pdf_getContextMeta() {
   const muni   = document.getElementById('muniSelector').value;
   const worker = document.getElementById('caseworkerSelector').value;
-  let contextLabel = 'PROVINCIAL CONSOLIDATED BASELINE (ALL PALAWAN LOCATIONS)';
-  let filename     = 'Provincial_EFV_Report';
+  let contextLabel='PROVINCIAL CONSOLIDATED BASELINE (ALL PALAWAN LOCATIONS)', scopeType='Provincial', filename='Provincial_EFV_Report';
   if (muni) {
-    if (worker) {
-      contextLabel = `INDIVIDUAL AUDIT — CASEWORKER: ${worker.toUpperCase()} (${muni.toUpperCase()} CLUSTER)`;
-      filename     = `Caseworker_${worker.replace(/[^a-zA-Z0-9]/g,'_')}_EFV_Report`;
-    } else {
-      contextLabel = `MUNICIPAL CLUSTER TRACK — AREA: ${muni.toUpperCase()}`;
-      filename     = `Municipality_${muni.replace(/[^a-zA-Z0-9]/g,'_')}_EFV_Report`;
-    }
+    if (worker) { contextLabel=`INDIVIDUAL AUDIT — CASEWORKER: ${worker.toUpperCase()} (${muni.toUpperCase()} CLUSTER)`; scopeType='Caseworker Audit'; filename=`Caseworker_${worker.replace(/[^a-zA-Z0-9]/g,'_')}_EFV_Report`; }
+    else        { contextLabel=`MUNICIPAL CLUSTER TRACK — AREA: ${muni.toUpperCase()}`; scopeType='Municipal'; filename=`Municipality_${muni.replace(/[^a-zA-Z0-9]/g,'_')}_EFV_Report`; }
   }
-  filename += `_${new Date().toISOString().slice(0,10)}`;
-  return { muni, worker, contextLabel, filename };
+  return { muni, worker, contextLabel, scopeType, filename: `${filename}_${new Date().toISOString().slice(0,10)}` };
 }
 
-// HELPER 2: Capture the live Chart.js canvas as a PNG data URL
+// UTIL: Capture chart canvas
 function pdf_captureChart() {
-  const canvas = document.getElementById('statusChart');
-  if (!canvas) return null;
-  try { return canvas.toDataURL('image/png'); }
-  catch(e) { console.warn('[PDF Engine] Chart capture failed:', e); return null; }
+  try { return document.getElementById('statusChart').toDataURL('image/png'); }
+  catch(e) { console.warn('[PDF] Chart capture failed:', e); return null; }
 }
 
-// HELPER 3: Build KPI summary table from live DOM text values
-function pdf_buildKPISection() {
-  const g = (id) => (document.getElementById(id) || {}).textContent || '--';
-  const rows = [
-    { label:'Total Target Caseload Scope',    valId:'kpiTotal',      pctId:'subTotal',      color:'#102a43', bg:'#f1f5f9', bold:true  },
-    { label:'Complete Progress Outcomes',      valId:'kpiComplete',   pctId:'pctComplete',   color:'#15803d', bg:'#f0fdf4', bold:false },
-    { label:'Incomplete Data Backlogs',        valId:'kpiIncomplete', pctId:'pctIncomplete', color:'#c2410c', bg:'#fff7ed', bold:false },
-    { label:'Invalid Conflict Entry Logs',     valId:'kpiInvalid',    pctId:'pctInvalid',    color:'#475569', bg:'#f8fafc', bold:false },
-    { label:'Pending Field Validation Stalls', valId:'kpiPending',    pctId:'pctPending',    color:'#b91c1c', bg:'#fef2f2', bold:false },
-  ];
-  const rowsHtml = rows.map(r => {
-    const pct = g(r.pctId).replace(' of scope','').replace(' scope volume','— 100%');
-    return `<tr style="background:${r.bg};">
-      <td style="border:1px solid #cbd5e1;padding:9px 12px;font-weight:${r.bold?'700':'600'};color:${r.color};">${r.label}</td>
-      <td style="border:1px solid #cbd5e1;padding:9px 12px;text-align:right;font-weight:800;font-size:14px;color:${r.color};">${g(r.valId)}</td>
-      <td style="border:1px solid #cbd5e1;padding:9px 12px;text-align:right;font-weight:600;color:${r.color};">${pct}</td>
-    </tr>`;
+// UTIL: Qualitative labels
+function pdf_topLabel(r){ return r>=92?'Clean tracking data':r>=85?'On-schedule submission':r>=78?'High verification velocity':r>=70?'Minimal encoding backlogs':r>=62?'Stable pace management':'Active clearance in progress'; }
+function pdf_bottomLabel(r){ return r<25?'Critical operational bottleneck':r<32?'Severe pending caseloads':r<38?'Logistical transmission delays':r<44?'High RELIC synchronization gaps':r<50?'Unassigned tracking targets':'Slow field validation turnaround'; }
+
+// UTIL: Narrative completion phrase
+function pdf_completionPhrase(r){
+  if(r>=90) return 'demonstrating excellent operational throughput ahead of target milestones';
+  if(r>=80) return 'indicating strong field velocity with minor residual backlogs remaining';
+  if(r>=70) return 'reflecting steady velocity but signaling a need to accelerate remaining field audits';
+  if(r>=60) return 'indicating steady velocity but signaling a critical need to expedite the remaining field audits before the upcoming phase deadline';
+  if(r>=50) return 'tracking at moderate pace with significant backlogs requiring immediate technical support activation';
+  if(r>=35) return 'tracking heavily behind schedule limits — strict monitoring and technical assistance workflows required immediately';
+  return 'in critical operational deficit — emergency field mobilization protocols should be activated without delay';
+}
+
+// SEC HEADER helper
+function pdf_secHead(n, label) {
+  return `<div style="font-weight:800;font-size:11px;text-transform:uppercase;background:#e8edf5;padding:7px 10px;margin:18px 0 10px;border-left:4px solid #102a43;letter-spacing:.6px;">${n}. ${label}</div>`;
+}
+
+// SECTION 1: Executive Summary
+function pdf_buildExecutiveSummary(meta, stats, chartDataUrl) {
+  const {total,complete,incomplete,invalid,pending,rate} = stats;
+  const rStr = rate.toFixed(1);
+  const pct  = (n) => total===0?'0.0':((n/total)*100).toFixed(1);
+  const ts   = new Date().toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
+  let where  = 'across the Province of Palawan';
+  if(meta.muni&&meta.worker) where=`under Caseworker ${meta.worker.toUpperCase()} in ${meta.muni} Cluster`;
+  else if(meta.muni)         where=`across the ${meta.muni} Municipality Cluster`;
+
+  const chart = chartDataUrl
+    ? `<img src="${chartDataUrl}" style="float:right;width:155px;height:auto;border:1px solid #e2e8f0;border-radius:6px;padding:6px;background:#fff;margin:0 0 10px 16px;"/>`
+    : '';
+
+  const note = incomplete>0
+    ? `<div style="background:#fffbeb;border:1px solid #fcd34d;border-left:4px solid #d97706;border-radius:4px;padding:8px 12px;font-size:10px;margin-top:10px;line-height:1.6;"><strong>Data Insight Note:</strong> While <strong>${rStr}%</strong> of the records have successfully cleared both the physical paper confirmation and system encoding tracks, there is a <strong>${pct(incomplete)}% synchronization gap</strong> representing data that is approved on paper but completely missing from the live RELIC system core.</div>`
+    : '';
+
+  return pdf_secHead(1,`Executive Summary (${meta.scopeType} Milestones)`) + `
+    <div style="font-size:11px;line-height:1.7;">
+      ${chart}
+      <p style="margin:0 0 8px;">As of ${ts}, the data management unit has compiled the automated cross-verification logs for the <strong>Extended Family Validation (EFV)</strong> tracking assignment ${where}.</p>
+      <p style="margin:0 0 10px;">The baseline figures display a <strong>${meta.scopeType} Completion Rate of ${rStr}%</strong>, ${pdf_completionPhrase(rate)}.</p>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#f1f5f9;font-weight:700;">Total ${meta.muni?'Municipal':'Provincial'} Caseload Target:</td><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#f1f5f9;font-weight:700;text-align:right;">${total.toLocaleString()} Records (100% Allocation)</td></tr>
+        <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;color:#15803d;font-weight:600;">Complete Status (Validated):</td><td style="padding:5px 10px;border:1px solid #e2e8f0;color:#15803d;font-weight:700;text-align:right;">${complete.toLocaleString()} Records (<strong>${rStr}%</strong> of total)</td></tr>
+        <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#fffbf5;color:#c2410c;font-weight:600;">Incomplete Status (RELIC Discrepancy&mdash;Sync Lag):</td><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#fffbf5;color:#c2410c;font-weight:700;text-align:right;">${incomplete.toLocaleString()} Records (<strong>${pct(incomplete)}%</strong> of total)</td></tr>
+        <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;color:#475569;font-weight:600;">Invalid Status (Data Discrepancy/Conflict):</td><td style="padding:5px 10px;border:1px solid #e2e8f0;color:#475569;font-weight:700;text-align:right;">${invalid.toLocaleString()} Records (<strong>${pct(invalid)}%</strong> of total)</td></tr>
+        <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#fff5f5;color:#b91c1c;font-weight:600;">Pending Status (Zero Field Progress):</td><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#fff5f5;color:#b91c1c;font-weight:700;text-align:right;">${pending.toLocaleString()} Records (<strong>${pct(pending)}%</strong> of total)</td></tr>
+      </table>
+      ${note}
+      <div style="clear:both;"></div>
+    </div>`;
+}
+
+// SECTION 2: Geographic Progress Rankings
+function pdf_buildGeographicRankings(meta, ds) {
+  const field  = meta.muni ? 'BARANGAY' : 'MUNICIPALITY';
+  const label  = meta.muni ? 'Barangays' : 'Municipalities';
+  const groups = pdf_groupByField(ds, field);
+  const top5   = [...groups].sort((a,b)=>b.rate-a.rate).slice(0,5);
+  const bot5   = [...groups].sort((a,b)=>a.rate-b.rate).slice(0,5);
+
+  const buildRows = (items, isBot) => items.map((item,i) => {
+    const c=isBot?'#b91c1c':'#15803d';
+    return `<tr style="background:${i%2===0?'#f8fafc':'#fff'};"><td style="border:1px solid #e2e8f0;padding:6px 8px;font-weight:700;font-size:10px;text-align:center;width:26px;color:#102a43;">${i+1}.</td><td style="border:1px solid #e2e8f0;padding:6px 8px;font-size:10px;font-weight:600;">${item.name}</td><td style="border:1px solid #e2e8f0;padding:6px 8px;font-size:10px;font-weight:800;color:${c};text-align:center;width:50px;">${item.rate}%</td><td style="border:1px solid #e2e8f0;padding:6px 8px;font-size:9px;color:#475569;font-style:italic;">${isBot?pdf_bottomLabel(item.rate):pdf_topLabel(item.rate)}</td></tr>`;
   }).join('');
-  return `
-    <div style="font-weight:800;font-size:11px;text-transform:uppercase;background:#e8edf5;padding:7px 10px;margin:18px 0 10px;border-left:4px solid #102a43;letter-spacing:.6px;">
-      1. Caseload Progress Summary Metrics
-    </div>
-    <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px;">
-      <thead>
-        <tr style="background:#102a43;color:#ffffff;">
-          <th style="border:1px solid #0f172a;padding:9px 12px;text-align:left;font-weight:700;font-size:11px;">Evaluation Metric</th>
-          <th style="border:1px solid #0f172a;padding:9px 12px;text-align:right;font-weight:700;font-size:11px;">Record Count</th>
-          <th style="border:1px solid #0f172a;padding:9px 12px;text-align:right;font-weight:700;font-size:11px;">Share %</th>
-        </tr>
-      </thead>
-      <tbody>${rowsHtml}</tbody>
+
+  const thStyle = 'border:1px solid #e2e8f0;padding:5px 8px;font-size:9px;';
+  return pdf_secHead(2,'Geographic Progress Rankings (Top 5 vs. Bottom 5)') + `
+    <p style="font-size:10px;color:#475569;margin:0 0 8px;">Based on the updated grid metrics configuration, the implementation pace varies significantly across operational clusters.</p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:10px;">
+      <thead><tr style="background:#15803d;color:#fff;"><th colspan="4" style="padding:6px 10px;font-size:10px;text-align:left;">👑 Highest Completion Track (Top 5 ${label})</th></tr><tr style="background:#f0fdf4;"><th style="${thStyle}text-align:center;">#</th><th style="${thStyle}text-align:left;">Name</th><th style="${thStyle}text-align:center;">Rate</th><th style="${thStyle}text-align:left;">Operational Status</th></tr></thead>
+      <tbody>${buildRows(top5,false)}</tbody>
+    </table>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:#b91c1c;color:#fff;"><th colspan="4" style="padding:6px 10px;font-size:10px;text-align:left;">🚨 Critical Bottlenecks (Bottom 5 ${label})</th></tr><tr style="background:#fef2f2;"><th style="${thStyle}text-align:center;">#</th><th style="${thStyle}text-align:left;">Name</th><th style="${thStyle}text-align:center;">Rate</th><th style="${thStyle}text-align:left;">Operational Status</th></tr></thead>
+      <tbody>${buildRows(bot5,true)}</tbody>
     </table>`;
 }
 
-// HELPER 4: Embed captured chart PNG into report body
-function pdf_buildChartSection(chartDataUrl) {
-  const header = `<div style="font-weight:800;font-size:11px;text-transform:uppercase;background:#e8edf5;padding:7px 10px;margin:18px 0 10px;border-left:4px solid #102a43;letter-spacing:.6px;">2. Validation Progress Ratio Chart</div>`;
-  if (!chartDataUrl) return header + `<div style="text-align:center;padding:28px;color:#94a3b8;border:1px dashed #cbd5e1;border-radius:6px;font-size:11px;">Chart image unavailable. Retry after chart fully renders.</div>`;
-  return header + `<div style="text-align:center;margin:10px 0 18px;"><img src="${chartDataUrl}" style="max-width:300px;height:auto;border:1px solid #e2e8f0;border-radius:8px;padding:10px;background:#ffffff;" /></div>`;
-}
+// SECTION 3: ML Performance Leaderboard
+function pdf_buildMLLeaderboard(meta, ds) {
+  if (meta.worker) return ''; // not applicable at caseworker drill-down
 
-// HELPER 5: Scrape live rankings from #rankingContainer DOM
-function pdf_buildRankingsSection() {
-  const cardTitle = (document.getElementById('rankingCardTitle') || {}).textContent || 'Performance Rankings';
-  const blocks    = document.querySelectorAll('#rankingContainer .rank-block');
-  const header    = `<div style="font-weight:800;font-size:11px;text-transform:uppercase;background:#e8edf5;padding:7px 10px;margin:18px 0 10px;border-left:4px solid #102a43;letter-spacing:.6px;">3. ${cardTitle.replace(/[👑⚠️]/g,'').trim()}</div>`;
-  if (!blocks.length) return header + `<div style="color:#94a3b8;font-style:italic;font-size:11px;margin:6px 0;">No ranking data available for current filter scope.</div>`;
+  const groups = pdf_groupByField(ds, 'ML_ASSIGNED');
+  const ranked = [...groups].sort((a,b)=>b.rate-a.rate||b.total-a.total).slice(0,10);
 
-  let cellsHtml = '';
-  blocks.forEach(block => {
-    const blockHeader = (block.querySelector('.rank-header') || {}).textContent || '';
-    const isLow       = blockHeader.toLowerCase().includes('lowest');
-    const hBg         = isLow ? '#fef2f2' : '#f0fdf4';
-    const hColor      = isLow ? '#b91c1c' : '#15803d';
-    const items       = block.querySelectorAll('.rank-item');
-    let itemRows = '';
-    items.forEach((item, i) => {
-      const badge    = (item.querySelector('.rank-badge') || {}).textContent || '';
-      const rate     = (item.querySelector('.rank-rate')  || {}).textContent || '';
-      const nameSpan = item.querySelector('span');
-      const name     = nameSpan ? nameSpan.textContent.replace(badge,'').trim() : '';
-      const rColor   = isLow ? '#b91c1c' : '#15803d';
-      itemRows += `<tr style="background:${i%2===0?'#f8fafc':'#ffffff'};">
-        <td style="border:1px solid #e2e8f0;padding:5px 7px;font-size:10px;font-weight:700;color:#102a43;white-space:nowrap;">${badge}</td>
-        <td style="border:1px solid #e2e8f0;padding:5px 7px;font-size:10px;">${name}</td>
-        <td style="border:1px solid #e2e8f0;padding:5px 7px;font-size:10px;font-weight:700;color:${rColor};text-align:right;white-space:nowrap;">${rate}</td>
-      </tr>`;
+  // Primary municipality per ML
+  const mlMuniMap = {};
+  if (!meta.muni) {
+    ds.forEach(r => {
+      const ml=( r.ML_ASSIGNED||'UNASSIGNED').trim(), mu=(r.MUNICIPALITY||'UNKNOWN').trim();
+      if(!mlMuniMap[ml]) mlMuniMap[ml]={};
+      mlMuniMap[ml][mu]=(mlMuniMap[ml][mu]||0)+1;
     });
-    cellsHtml += `<td style="width:50%;vertical-align:top;padding:0 5px;">
-      <div style="font-weight:700;font-size:10px;text-transform:uppercase;padding:5px 8px;background:${hBg};color:${hColor};border:1px solid #e2e8f0;border-bottom:none;border-radius:4px 4px 0 0;">${blockHeader.replace(/[👑⚠️]/g,'').trim()}</div>
-      <table style="width:100%;border-collapse:collapse;"><tbody>${itemRows}</tbody></table>
-    </td>`;
-  });
-
-  return header + `<table style="width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:4px;"><tr>${cellsHtml}</tr></table>`;
-}
-
-// HELPER 6: Scrape operational alerts from #analysisPanel DOM
-function pdf_buildAlertsSection() {
-  const rows   = document.querySelectorAll('#analysisPanel .insight-row');
-  const header = `<div style="font-weight:800;font-size:11px;text-transform:uppercase;background:#e8edf5;padding:7px 10px;margin:18px 0 10px;border-left:4px solid #102a43;letter-spacing:.6px;">4. Automated Data Analysis &amp; Operational Critical Alerts</div>`;
-  if (!rows.length) return header + `<div style="color:#94a3b8;font-style:italic;font-size:11px;margin:6px 0;">No alerts detected in current operational scope.</div>`;
-
-  const styleMap = {
-    'insight-danger':  { bg:'#fef2f2', border:'#b91c1c', text:'#7f1d1d' },
-    'insight-warning': { bg:'#fff7ed', border:'#c2410c', text:'#7c2d12' },
-    'insight-success': { bg:'#f0fdf4', border:'#15803d', text:'#064e3b' },
+  }
+  const getMuni = (ml) => {
+    if(meta.muni) return meta.muni;
+    const mc=mlMuniMap[ml]; if(!mc) return '';
+    return Object.entries(mc).sort((a,b)=>b[1]-a[1])[0][0];
   };
+  const icon = (i) => i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
 
-  let alertsHtml = '';
-  rows.forEach(row => {
-    let typeKey = 'insight-success';
-    if (row.classList.contains('insight-danger'))  typeKey = 'insight-danger';
-    if (row.classList.contains('insight-warning')) typeKey = 'insight-warning';
-    const s     = styleMap[typeKey];
-    const icon  = (row.querySelector('.insight-icon')  || {}).textContent || '';
-    const title = (row.querySelector('.insight-title') || {}).textContent || '';
-    const descEl = row.querySelector('.insight-desc');
-    let descHtml = '';
-    if (descEl) {
-      const cloned = descEl.cloneNode(true);
-      const clusterBlocks = Array.from(cloned.querySelectorAll('div[style*="margin-top: 12px"]'));
-      let clusterRows = '';
-      clusterBlocks.forEach(block => {
-        const clusterTitle = (block.querySelector('div') || {}).textContent || '';
-        const tagText = Array.from(block.querySelectorAll('.target-tag')).map(t => t.textContent.trim()).join(' · ');
-        if (clusterTitle.trim()) {
-          clusterRows += `<tr>
-            <td style="padding:3px 6px;font-size:9px;font-weight:700;color:${s.text};white-space:nowrap;vertical-align:top;border-bottom:1px solid rgba(0,0,0,0.05);">${clusterTitle.trim()}</td>
-            <td style="padding:3px 6px;font-size:9px;vertical-align:top;border-bottom:1px solid rgba(0,0,0,0.05);">${tagText}</td>
-          </tr>`;
-        }
-        block.remove();
-      });
-      cloned.querySelectorAll('.target-tag').forEach(t => { t.parentNode.insertBefore(document.createTextNode(' '+t.textContent+' '), t); t.remove(); });
-      const introText = cloned.textContent.trim().replace(/\s{2,}/g,' ');
-      descHtml = `<div style="font-size:11px;margin-bottom:${clusterRows?'6':'0'}px;">${introText}</div>`;
-      if (clusterRows) descHtml += `<table style="width:100%;border-collapse:collapse;margin-top:4px;background:rgba(255,255,255,0.55);border-radius:4px;overflow:hidden;"><tbody>${clusterRows}</tbody></table>`;
-    }
-    alertsHtml += `
-      <div style="display:flex;gap:10px;padding:10px 12px;border-radius:5px;border-left:4px solid ${s.border};background:${s.bg};color:${s.text};margin-bottom:8px;page-break-inside:avoid;">
-        <div style="font-size:15px;line-height:1;margin-top:1px;min-width:18px;flex-shrink:0;">${icon}</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:700;font-size:11px;margin-bottom:4px;">${title}</div>
-          <div style="font-size:11px;line-height:1.5;">${descHtml}</div>
-        </div>
-      </div>`;
-  });
+  const rows = ranked.map((ml,i) => {
+    const rc=ml.rate>=80?'#15803d':ml.rate>=60?'#c2410c':'#b91c1c';
+    const mu=getMuni(ml.name);
+    return `<tr style="background:${i%2===0?'#f8fafc':'#fff'};"><td style="border:1px solid #e2e8f0;padding:6px 8px;font-weight:800;font-size:11px;text-align:center;width:36px;">${icon(i)}</td><td style="border:1px solid #e2e8f0;padding:6px 8px;font-size:10px;"><div style="font-weight:700;">ML Officer: ${ml.name}</div>${mu?`<div style="font-size:9px;color:#64748b;">${mu} Cluster</div>`:''}</td><td style="border:1px solid #e2e8f0;padding:6px 8px;text-align:center;"><div style="font-weight:800;font-size:10px;color:${rc};">${ml.rate}%</div><div style="font-size:9px;color:#64748b;">Progress Output</div></td><td style="border:1px solid #e2e8f0;padding:6px 8px;text-align:center;"><div style="font-weight:700;font-size:10px;color:#334e68;">${ml.total.toLocaleString()}</div><div style="font-size:9px;color:#64748b;">Caseload Weight</div></td><td style="border:1px solid #e2e8f0;padding:6px 8px;text-align:center;"><div style="font-weight:700;font-size:10px;color:#15803d;">${ml.complete.toLocaleString()}</div><div style="font-size:9px;color:#64748b;">Complete</div></td><td style="border:1px solid #e2e8f0;padding:6px 8px;text-align:center;"><div style="font-weight:700;font-size:10px;color:#b91c1c;">${(ml.pending+ml.incomplete).toLocaleString()}</div><div style="font-size:9px;color:#64748b;">Backlog</div></td></tr>`;
+  }).join('');
 
-  return header + `<div>${alertsHtml}</div>`;
+  const th = (t,w='') => `<th style="border:1px solid #0f172a;padding:6px 8px;font-size:9px;text-align:center;${w?'width:'+w+';':''}font-weight:700;">${t}</th>`;
+  return pdf_secHead(3,'Municipal Link (ML) Performance Leaderboard') + `
+    <p style="font-size:10px;color:#475569;margin:0 0 4px;font-style:italic;">${meta.muni?meta.muni+' Cluster':'Provincial'} — Ranked by Multi-Tier Matrix: Highest Progress Output Ratio → Highest Target Caseload Weight on ties.</p>
+    <p style="font-size:10px;color:#475569;margin:0 0 8px;">The following leaderboard establishes the true workload vs. output capability distribution among assigned field officers:</p>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:#102a43;color:#fff;">${th('Rank','36px')}${th('ML Caseworker','')}${th('Output Ratio','68px')}${th('Caseload','68px')}${th('Complete','58px')}${th('Backlog','58px')}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
 }
 
-// HELPER 7: Assemble full PDF document HTML
-function pdf_assembleDocument(meta, chartDataUrl) {
-  const ts        = new Date().toLocaleString('en-PH', { dateStyle:'long', timeStyle:'medium' });
-  const now       = new Date();
-  const reportRef = `EFV-${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+// SECTION 4: Critical Operational Alerts & Hit List
+function pdf_buildAlertHitList(meta, ds, stats) {
+  const {pending, incomplete} = stats;
+  let html = pdf_secHead(4,'Critical Operational Alerts &amp; Hit List') +
+    `<p style="font-size:10px;color:#475569;margin:0 0 10px;font-style:italic;">(Action items targeted at specific data blocks that are stalling the system)</p>`;
 
-  return `
-<div style="padding:36px 44px;background:#ffffff;color:#0f172a;font-family:'Helvetica','Arial',sans-serif;font-size:12px;line-height:1.6;max-width:760px;margin:0 auto;">
+  // A. Pending
+  if (pending > 0) {
+    const byML={};
+    ds.filter(r=>!['COMPLETE','INCOMPLETE','INVALID'].includes(String(r.FINAL_STATUS||'').toUpperCase()))
+      .forEach(r=>{ const ml=(r.ML_ASSIGNED||'UNASSIGNED').trim(); byML[ml]=(byML[ml]||0)+1; });
+    const rows=Object.entries(byML).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([ml,c])=>
+      `<tr><td style="padding:5px 8px;border:1px solid #fecaca;font-size:10px;">👤 ML Officer: <strong>${ml}</strong></td><td style="padding:5px 8px;border:1px solid #fecaca;font-size:10px;text-align:right;font-weight:700;color:#b91c1c;">&mdash; ${c.toLocaleString()} Pending cases untouched</td></tr>`).join('');
+    html+=`<div style="margin-bottom:12px;"><div style="font-weight:700;font-size:11px;background:#fef2f2;border:1px solid #fecaca;border-bottom:none;padding:6px 10px;border-radius:4px 4px 0 0;color:#b91c1c;">A. The Validation Stall (Pending Cases)</div><div style="border:1px solid #fecaca;border-top:none;padding:8px 10px;font-size:10px;line-height:1.6;background:#fff;">There are <strong>${pending.toLocaleString()} records</strong> that have zero progress entry or field notes from the field (<em>Validated = No</em>). These cases are currently sitting stagnant.<br><br><strong>Action Required:</strong> Immediate data call-up and desk audit for the following Municipal Links who hold these unvalidated brackets:</div><table style="width:100%;border-collapse:collapse;"><tbody>${rows}</tbody></table></div>`;
+  }
 
+  // B. RELIC Backlog
+  if (incomplete > 0) {
+    const byML={};
+    ds.filter(r=>String(r.FINAL_STATUS||'').toUpperCase()==='INCOMPLETE')
+      .forEach(r=>{ const ml=(r.ML_ASSIGNED||'UNASSIGNED').trim(); byML[ml]=(byML[ml]||0)+1; });
+    const rows=Object.entries(byML).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([ml,c])=>
+      `<tr><td style="padding:5px 8px;border:1px solid #fed7aa;font-size:10px;">👤 ML Officer: <strong>${ml}</strong></td><td style="padding:5px 8px;border:1px solid #fed7aa;font-size:10px;text-align:right;font-weight:700;color:#c2410c;">&mdash; ${c.toLocaleString()} Validation forms pending encoding</td></tr>`).join('');
+    html+=`<div style="margin-bottom:12px;"><div style="font-weight:700;font-size:11px;background:#fff7ed;border:1px solid #fed7aa;border-bottom:none;padding:6px 10px;border-radius:4px 4px 0 0;color:#c2410c;">B. The RELIC Synchronization Backlog (Incomplete Pipeline)</div><div style="border:1px solid #fed7aa;border-top:none;padding:8px 10px;font-size:10px;line-height:1.6;background:#fff;">A major block in our pipeline consists of <strong>${incomplete.toLocaleString()} records</strong> that are fully validated on paper forms (<em>Validated = YES</em>) but have not been encoded into the system infrastructure (<em>Updated in RELIC = NO</em>).<br><br><strong>Action Required:</strong> Direct technical enforcement to clear encoding bottlenecks. The following officers must sync their field binders with the central RELIC workstation immediately:</div><table style="width:100%;border-collapse:collapse;"><tbody>${rows}</tbody></table></div>`;
+  }
+
+  // C. Geographic Bottlenecks
+  if (!meta.worker) {
+    const bm={};
+    ds.forEach(r=>{
+      const k=`${(r.MUNICIPALITY||'UNKNOWN').trim()}|||${(r.BARANGAY||'UNKNOWN').trim()}`;
+      if(!bm[k]) bm[k]={muni:(r.MUNICIPALITY||'UNKNOWN').trim(),brgy:(r.BARANGAY||'UNKNOWN').trim(),total:0,complete:0};
+      bm[k].total++;
+      if(String(r.FINAL_STATUS||'').toUpperCase()==='COMPLETE') bm[k].complete++;
+    });
+    const slow=Object.values(bm).map(b=>({...b,rate:b.total===0?0:Math.round((b.complete/b.total)*100)})).filter(b=>b.rate<45&&b.total>=2).sort((a,b)=>a.rate-b.rate).slice(0,8);
+    if(slow.length>0){
+      const rows=slow.map(b=>`<tr><td style="padding:5px 8px;border:1px solid #e2e8f0;font-size:10px;">📍 ${b.muni} &rarr; <strong>Brgy. ${b.brgy}</strong></td><td style="padding:5px 8px;border:1px solid #e2e8f0;font-size:10px;text-align:right;">${b.complete.toLocaleString()}/${b.total.toLocaleString()} cases completed &mdash; <strong style="color:#b91c1c;">${b.rate}%</strong></td></tr>`).join('');
+      html+=`<div style="margin-bottom:12px;"><div style="font-weight:700;font-size:11px;background:#fef2f2;border:1px solid #fecaca;border-bottom:none;padding:6px 10px;border-radius:4px 4px 0 0;color:#b91c1c;">C. Localized Geographic Bottlenecks (Barangay Clusters &lt; 45%)</div><div style="border:1px solid #fecaca;border-top:none;padding:8px 10px;font-size:10px;line-height:1.6;background:#fff;">The following specific barangay clusters have been identified as severe operational data dead-zones:</div><table style="width:100%;border-collapse:collapse;"><tbody>${rows}</tbody></table></div>`;
+    }
+  }
+
+  return html;
+}
+
+// SECTION 5: Strategic Recommendations
+function pdf_buildRecommendations(meta, stats, ds) {
+  const {total,pending,incomplete,invalid,rate} = stats;
+  const pct = (n) => total===0?0:(n/total)*100;
+
+  const bm={};
+  ds.forEach(r=>{ const k=`${r.MUNICIPALITY||''}|||${r.BARANGAY||''}`; if(!bm[k]) bm[k]={total:0,complete:0}; bm[k].total++; if(String(r.FINAL_STATUS||'').toUpperCase()==='COMPLETE') bm[k].complete++; });
+  const hasLowBrgys = Object.values(bm).some(b=>b.total>=2&&(b.complete/b.total)<0.45);
+
+  const mlP={};
+  ds.filter(r=>!['COMPLETE','INCOMPLETE','INVALID'].includes(String(r.FINAL_STATUS||'').toUpperCase())).forEach(r=>{ const ml=r.ML_ASSIGNED||'UNASSIGNED'; mlP[ml]=(mlP[ml]||0)+1; });
+  const hasHighPendingML = Object.values(mlP).some(c=>c>=30);
+
+  const recs=[];
+  if(pct(pending)>=10)    recs.push({t:'Deploy Mobile Data Clean-up Units', b:`Conduct targeted technical visits to ${hasHighPendingML?'the highest-pending Municipal Link officers':'affected cluster areas'} to provide on-site assistance in clearing unvalidated records and improving field submission velocity prior to the phase deadline.`});
+  if(pct(incomplete)>=8)  recs.push({t:'Accelerate RELIC Encoding Windows', b:`Enforce a strict 48-hour encoding compliance window for all Municipal Links carrying Incomplete Status records. Officers must synchronize their physical field binders with the central RELIC workstation to eliminate the existing data entry backlog without further delay.`});
+  if(hasLowBrgys)         recs.push({t:'Conduct Geographic Integrity Sweeps', b:`Mandate an immediate re-verification pass across all identified low-completion barangay sectors. Field teams must resolve outstanding eligibility discrepancies and exception-flagged entries before the close of the current audit period to prevent cross-batch expiration conflicts.`});
+  if(pct(invalid)>=3)     recs.push({t:'Data Integrity Cross-Matching Review', b:`Initiate a formal cross-matching review of the ${invalid.toLocaleString()} INVALID-flagged entries in coordination with the PPIS and BDM Tracker systems. Priority must be given to resolving duplicate household IDs, name mismatches, and missing demographic fields ahead of the next validation cycle.`});
+  if(rate<75)             recs.push({t:'Escalate Monitoring and Reporting Frequency', b:`Given the current ${meta.muni?meta.muni+' municipal':'provincial'} completion rate of ${rate.toFixed(1)}%, monitoring check-ins and progress reporting must be elevated to a twice-weekly cadence until the operational baseline reaches the 80% completion threshold.`});
+  if(recs.length===0)     recs.push({t:'Sustain Current Operational Momentum', b:`The current completion rate of ${rate.toFixed(1)}% reflects a high level of operational compliance across assigned caseloads. Field teams are directed to sustain the existing processing velocity and prioritize the clearance of remaining backlogs to achieve full completion targets.`});
+
+  const rows=recs.map((r,i)=>`<tr style="background:${i%2===0?'#f8fafc':'#fff'};"><td style="padding:8px 10px;border:1px solid #e2e8f0;font-weight:800;font-size:11px;text-align:center;width:26px;color:#102a43;vertical-align:top;">${i+1}.</td><td style="padding:8px 10px;border:1px solid #e2e8f0;font-weight:700;font-size:10px;color:#102a43;vertical-align:top;width:160px;">${r.t}</td><td style="padding:8px 10px;border:1px solid #e2e8f0;font-size:10px;line-height:1.6;">${r.b}</td></tr>`).join('');
+  return pdf_secHead(5,'Strategic Recommendations / Next Steps') + `<table style="width:100%;border-collapse:collapse;"><tbody>${rows}</tbody></table>`;
+}
+
+// ASSEMBLER: Stitch all sections into final PDF document HTML
+function pdf_assembleDocument(meta, stats, ds, chartDataUrl) {
+  const now=new Date(), ts=now.toLocaleString('en-PH',{dateStyle:'long',timeStyle:'medium'});
+  const ref=`EFV-${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  return `<div style="padding:36px 44px;background:#ffffff;color:#0f172a;font-family:'Helvetica','Arial',sans-serif;font-size:12px;line-height:1.6;max-width:760px;margin:0 auto;">
   <div style="text-align:center;border-bottom:3px double #102a43;padding-bottom:14px;margin-bottom:18px;">
     <div style="font-size:9px;font-weight:700;letter-spacing:1.2px;color:#475569;text-transform:uppercase;margin-bottom:1px;">Republic of the Philippines</div>
     <div style="font-size:9px;font-weight:700;letter-spacing:1px;color:#475569;text-transform:uppercase;margin-bottom:1px;">Department of Social Welfare and Development</div>
     <div style="font-size:9px;color:#64748b;margin-bottom:10px;">Pantawid Pamilyang Pilipino Program (4Ps) &bull; Palawan Field Operations</div>
-    <div style="font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Extended Family Validation (EFV)</div>
-    <div style="font-size:12px;font-weight:700;color:#334e68;letter-spacing:.2px;">Field Validation &amp; RELIC Encoding — Operational Progress Report</div>
-    <div style="font-size:9px;color:#94a3b8;margin-top:6px;letter-spacing:.5px;">REPORT REF: ${reportRef} &nbsp;|&nbsp; GENERATED: ${ts}</div>
+    <div style="font-size:17px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Extended Family Validation (EFV)</div>
+    <div style="font-size:12px;font-weight:700;color:#334e68;">Field Validation &amp; RELIC Encoding &mdash; Operational Progress Report</div>
+    <div style="font-size:9px;color:#94a3b8;margin-top:6px;">REPORT REF: ${ref} &nbsp;|&nbsp; GENERATED: ${ts}</div>
   </div>
-
-  <table style="width:100%;font-size:11px;margin-bottom:14px;border-collapse:collapse;border:1px solid #e2e8f0;background:#f8fafc;">
-    <tr>
-      <td style="padding:6px 12px;font-weight:700;width:130px;vertical-align:top;border-bottom:1px solid #e2e8f0;">MEMO TO:</td>
-      <td style="padding:6px 12px;vertical-align:top;border-bottom:1px solid #e2e8f0;">Provincial Link Operations Office / Technical Evaluation Unit</td>
-    </tr>
-    <tr>
-      <td style="padding:6px 12px;font-weight:700;vertical-align:top;border-bottom:1px solid #e2e8f0;">FROM:</td>
-      <td style="padding:6px 12px;vertical-align:top;border-bottom:1px solid #e2e8f0;">Beneficiary Data Management Officer (BDMO) — Palawan</td>
-    </tr>
-    <tr>
-      <td style="padding:6px 12px;font-weight:700;vertical-align:top;border-bottom:1px solid #e2e8f0;">SUBJECT:</td>
-      <td style="padding:6px 12px;vertical-align:top;border-bottom:1px solid #e2e8f0;">EFV Operational Progress Audit — Cascading Filtration Matrix Report</td>
-    </tr>
-    <tr>
-      <td style="padding:6px 12px;font-weight:700;vertical-align:top;border-bottom:1px solid #e2e8f0;">SCOPE / FILTER:</td>
-      <td style="padding:6px 12px;font-weight:700;color:#102a43;vertical-align:top;border-bottom:1px solid #e2e8f0;">${meta.contextLabel}</td>
-    </tr>
-    <tr>
-      <td style="padding:6px 12px;font-weight:700;vertical-align:top;">DATA TIMESTAMP:</td>
-      <td style="padding:6px 12px;color:#475569;vertical-align:top;">${ts}</td>
-    </tr>
+  <table style="width:100%;font-size:11px;margin-bottom:16px;border-collapse:collapse;border:1px solid #e2e8f0;background:#f8fafc;">
+    <tr><td style="padding:6px 12px;font-weight:700;width:130px;border-bottom:1px solid #e2e8f0;vertical-align:top;">MEMO TO:</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;">Provincial Link Operations Office / Technical Evaluation Unit</td></tr>
+    <tr><td style="padding:6px 12px;font-weight:700;border-bottom:1px solid #e2e8f0;vertical-align:top;">FROM:</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;">Beneficiary Data Management Officer (BDMO) &mdash; Palawan</td></tr>
+    <tr><td style="padding:6px 12px;font-weight:700;border-bottom:1px solid #e2e8f0;vertical-align:top;">SUBJECT:</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;">EFV Operational Progress Audit &mdash; Cascading Filtration Matrix Report</td></tr>
+    <tr><td style="padding:6px 12px;font-weight:700;border-bottom:1px solid #e2e8f0;vertical-align:top;">SCOPE / FILTER:</td><td style="padding:6px 12px;font-weight:700;color:#102a43;border-bottom:1px solid #e2e8f0;">${meta.contextLabel}</td></tr>
+    <tr><td style="padding:6px 12px;font-weight:700;vertical-align:top;">DATA TIMESTAMP:</td><td style="padding:6px 12px;color:#475569;">${ts}</td></tr>
   </table>
-
   <div style="border-top:1px solid #cbd5e1;margin:14px 0;"></div>
-
-  ${pdf_buildKPISection()}
-  ${pdf_buildChartSection(chartDataUrl)}
-  ${pdf_buildRankingsSection()}
-  ${pdf_buildAlertsSection()}
-
-  <div style="font-weight:800;font-size:11px;text-transform:uppercase;background:#e8edf5;padding:7px 10px;margin:18px 0 10px;border-left:4px solid #102a43;letter-spacing:.6px;">
-    5. Operational Status Definitions &amp; Compliance Directives
-  </div>
-  <table style="width:100%;border-collapse:collapse;font-size:11px;line-height:1.6;">
-    <tr style="background:#f8fafc;">
-      <td style="padding:7px 10px;font-weight:700;color:#15803d;border:1px solid #e2e8f0;width:110px;white-space:nowrap;vertical-align:top;">COMPLETE</td>
-      <td style="padding:7px 10px;border:1px solid #e2e8f0;">Record has cleared both physical validation form processing AND finalized digital synchronization in the live RELIC database console.</td>
-    </tr>
-    <tr>
-      <td style="padding:7px 10px;font-weight:700;color:#c2410c;border:1px solid #e2e8f0;vertical-align:top;">INCOMPLETE</td>
-      <td style="padding:7px 10px;border:1px solid #e2e8f0;">Field verification paperwork finalized but digital encoding is missing from the RELIC platform. Concerned staff must complete sync protocols within 48 operational hours.</td>
-    </tr>
-    <tr style="background:#f8fafc;">
-      <td style="padding:7px 10px;font-weight:700;color:#475569;border:1px solid #e2e8f0;vertical-align:top;">INVALID</td>
-      <td style="padding:7px 10px;border:1px solid #e2e8f0;">Record flagged with data conflicts, duplicate identifiers, or non-resolvable cross-matching errors requiring supervisory-level review and reconciliation.</td>
-    </tr>
-    <tr>
-      <td style="padding:7px 10px;font-weight:700;color:#b91c1c;border:1px solid #e2e8f0;vertical-align:top;">PENDING</td>
-      <td style="padding:7px 10px;border:1px solid #e2e8f0;">Unverified, untouched casing segments requiring urgent mobilization of field validation assets to prevent metric cross-batch expiration loops.</td>
-    </tr>
-  </table>
-
-  <div style="border-top:1px dashed #94a3b8;margin:30px 0 18px;"></div>
+  ${pdf_buildExecutiveSummary(meta,stats,chartDataUrl)}
+  ${pdf_buildGeographicRankings(meta,ds)}
+  ${pdf_buildMLLeaderboard(meta,ds)}
+  ${pdf_buildAlertHitList(meta,ds,stats)}
+  ${pdf_buildRecommendations(meta,stats,ds)}
+  <div style="border-top:1px dashed #94a3b8;margin:28px 0 16px;"></div>
   <table style="width:100%;font-size:11px;border-collapse:collapse;">
     <tr>
-      <td style="width:55%;vertical-align:top;">
-        <div style="font-weight:700;margin-bottom:42px;">Compiled &amp; Certified By:</div>
-        <div style="font-weight:800;text-transform:uppercase;border-bottom:1.5px solid #0f172a;display:inline-block;padding-bottom:2px;letter-spacing:.3px;">Cecilio Jr. Bacoog Soliven</div>
-        <div style="color:#475569;font-size:10px;margin-top:3px;">Beneficiary Data Management Officer (BDMO)</div>
-        <div style="color:#475569;font-size:10px;">DSWD 4Ps &bull; Palawan Core Operations</div>
-      </td>
-      <td style="width:45%;vertical-align:bottom;text-align:right;">
-        <div style="font-size:9px;color:#94a3b8;font-style:italic;">[SYSTEM-GENERATED — EFV DASHBOARD EXPORT]</div>
-        <div style="font-size:9px;color:#94a3b8;">Operational Control Hub &bull; Palawan Field Operations</div>
-        <div style="font-size:9px;color:#cbd5e1;margin-top:2px;">${reportRef}</div>
-      </td>
+      <td style="width:55%;vertical-align:top;"><div style="font-weight:700;margin-bottom:40px;">Prepared by:</div><div style="font-weight:800;text-transform:uppercase;border-bottom:1.5px solid #0f172a;display:inline-block;padding-bottom:2px;letter-spacing:.3px;">Cecilio Jr. Bacoog Soliven</div><div style="color:#475569;font-size:10px;margin-top:3px;">Beneficiary Data Management Officer &mdash; 4Ps Palawan</div><div style="color:#475569;font-size:10px;">DSWD Field Office IV-B (MIMAROPA)</div></td>
+      <td style="width:45%;vertical-align:bottom;text-align:right;"><div style="font-size:9px;color:#94a3b8;font-style:italic;">[SYSTEM-GENERATED &mdash; EFV OPERATIONAL CONTROL HUB]</div><div style="font-size:9px;color:#94a3b8;">Palawan Field Operations &bull; ${ref}</div></td>
     </tr>
   </table>
-
 </div>`;
 }
 
-// MAIN — wired to #generateMemoBtn click
+// MAIN — wired to #generateMemoBtn
 async function compileAndExportOfficialPDF() {
-  const btn          = document.getElementById('generateMemoBtn');
-  const originalText = btn.textContent;
-  btn.disabled    = true;
-  btn.textContent = '⌛ Capturing dashboard state...';
+  const btn=document.getElementById('generateMemoBtn'), orig=btn.textContent;
+  btn.disabled=true; btn.textContent='⌛ Capturing dashboard state...';
   try {
-    // Wait for chart animations to fully settle before toDataURL()
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(r=>setTimeout(r,500)); // let chart settle before toDataURL
     const meta         = pdf_getContextMeta();
+    const ds           = pdf_getFilteredDataset();
+    const stats        = pdf_computeStats(ds);
     const chartDataUrl = pdf_captureChart();
-    btn.textContent    = '⌛ Assembling report sections...';
-    const docHtml      = pdf_assembleDocument(meta, chartDataUrl);
-    btn.textContent    = '⌛ Rendering PDF document...';
+    btn.textContent='⌛ Assembling 5-section report...';
+    const docHtml=pdf_assembleDocument(meta,stats,ds,chartDataUrl);
+    btn.textContent='⌛ Rendering PDF...';
     await html2pdf().set({
-      margin:      [12, 10, 14, 10],
-      filename:    `${meta.filename}.pdf`,
-      image:       { type: 'jpeg', quality: 0.97 },
-      html2canvas: { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
-      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
+      margin:[12,10,14,10], filename:`${meta.filename}.pdf`,
+      image:{type:'jpeg',quality:0.97},
+      html2canvas:{scale:2,useCORS:true,logging:false,scrollX:0,scrollY:0},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true}
     }).from(docHtml).save();
   } catch(err) {
-    console.error('[PDF Engine] Export failed:', err);
+    console.error('[PDF Engine] Export failed:',err);
     alert('System error during PDF compilation.\nCheck browser console for details.');
   } finally {
-    btn.disabled    = false;
-    btn.textContent = originalText;
+    btn.disabled=false; btn.textContent=orig;
   }
 }
 
-
-// =======================================================================
-//  EVENT WIRING
-// =======================================================================
+// ── EVENT WIRING ──────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('refreshBtn').addEventListener('click', syncControlDashboard);
   document.getElementById('generateMemoBtn').addEventListener('click', compileAndExportOfficialPDF);
-  document.getElementById('muniSelector').addEventListener('change', () => {
-    updateCaseworkerDropdown();
-    executeAggregationPipeline();
-  });
+  document.getElementById('muniSelector').addEventListener('change', () => { updateCaseworkerDropdown(); executeAggregationPipeline(); });
   document.getElementById('caseworkerSelector').addEventListener('change', executeAggregationPipeline);
   syncControlDashboard();
   setInterval(syncControlDashboard, 60000);
