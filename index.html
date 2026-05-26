@@ -131,13 +131,19 @@ a{color:inherit;text-decoration:none}
     <div class="control-panel">
       <div class="filter-row-fields">
         <div class="field">
-          <label class="field-label">Tier 1: Select Municipality Cluster</label>
+          <label class="field-label">Tier 1: Select Cluster</label>
+          <select id="clusterSelector">
+            <option value="">ALL CLUSTERS</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Tier 2: Select Municipality Cluster</label>
           <select id="muniSelector">
             <option value="">PROVINCIAL OVERVIEW (All Palawan Locations)</option>
           </select>
         </div>
         <div class="field">
-          <label class="field-label">Tier 2: Target Link Caseworker Assignment</label>
+          <label class="field-label">Tier 3: Target Link Caseworker Assignment</label>
           <select id="caseworkerSelector" disabled>
             <option value="">Select Municipality Level First...</option>
           </select>
@@ -216,6 +222,7 @@ async function syncControlDashboard() {
     const body = await res.json();
     if (!res.ok || body.success === false) throw new Error();
     centralRecordsCache = body.data || [];
+    populateClusterDropdown();
     populateMuniDropdown();
     executeAggregationPipeline();
     document.getElementById('updatedAt').textContent = `Last synchronized: ${new Date().toLocaleTimeString()}`;
@@ -225,17 +232,29 @@ async function syncControlDashboard() {
   }
 }
 
-function populateMuniDropdown() {
-  const sel = document.getElementById('muniSelector');
-  const cur = sel.value;
-  const munis = [...new Set(centralRecordsCache.map(r => r.MUNICIPALITY))].filter(Boolean).sort();
-  sel.innerHTML = '<option value="">PROVINCIAL OVERVIEW (All Palawan Locations)</option>' +
-    munis.map(m => `<option value="${m}">${m.toUpperCase()} CLUSTER LEVEL</option>`).join('');
-  if (munis.includes(cur)) {
-    sel.value = cur;
-  } else {
-    document.getElementById('caseworkerSelector').disabled = true;
-    document.getElementById('caseworkerSelector').innerHTML = '<option value="">Select Municipality Level First...</option>';
+function populateClusterDropdown() {
+
+  const sel = document.getElementById('clusterSelector');
+
+  const current = sel.value;
+
+  const clusters = [
+    ...new Set(
+      centralRecordsCache.map(r => r.CLUSTER)
+    )
+  ]
+  .filter(Boolean)
+  .sort();
+
+  sel.innerHTML =
+    '<option value="">ALL CLUSTERS</option>' +
+
+    clusters.map(c =>
+      `<option value="${c}">${c.toUpperCase()}</option>`
+    ).join('');
+
+  if (clusters.includes(current)) {
+    sel.value = current;
   }
 }
 
@@ -243,17 +262,41 @@ function updateCaseworkerDropdown() {
   const muni = document.getElementById('muniSelector').value;
   const csel = document.getElementById('caseworkerSelector');
   if (!muni) { csel.disabled = true; csel.innerHTML = '<option value="">Select Municipality Level First...</option>'; return; }
-  const mls = [...new Set(centralRecordsCache.filter(r => r.MUNICIPALITY === muni).map(r => r.ML_ASSIGNED))].filter(Boolean).sort();
+  const cluster =
+  document.getElementById('clusterSelector').value;
+
+let source = centralRecordsCache;
+
+if (cluster) {
+
+  source = source.filter(
+    r => r.CLUSTER === cluster
+  );
+
+}
+
+const munis = [
+  ...new Set(
+    source.map(r => r.MUNICIPALITY)
+  )
+]
+.filter(Boolean)
+.sort();
   csel.disabled = false;
   csel.innerHTML = '<option value="">ALL CASEWORKER ASSIGNMENTS (Cluster Summary)</option>' +
     mls.map(ml => `<option value="${ml}">👤 ML LINK: ${ml.toUpperCase()}</option>`).join('');
 }
 
 function executeAggregationPipeline() {
-  const muniFocus   = document.getElementById('muniSelector').value;
-  const workerFocus = document.getElementById('caseworkerSelector').value;
+  const clusterFocus =
+  document.getElementById('clusterSelector').value;
+  const muniFocus =
+  document.getElementById('muniSelector').value;
+  const workerFocus =
+  document.getElementById('caseworkerSelector').value;
   let ds = centralRecordsCache;
-  if (muniFocus)   ds = ds.filter(r => r.MUNICIPALITY === muniFocus);
+  if (clusterFocus) ds = ds.filter(r => r.CLUSTER === clusterFocus);
+  if (muniFocus) ds = ds.filter(r => r.MUNICIPALITY === muniFocus);
   if (workerFocus) ds = ds.filter(r => r.ML_ASSIGNED  === workerFocus);
 
   const total = ds.length;
@@ -905,6 +948,22 @@ document.addEventListener('DOMContentLoaded', () => {
     .addEventListener('click', compileAndExportOfficialPDF);
 
   // FILTER EVENTS
+  document
+  .getElementById('clusterSelector')
+  .addEventListener('change', () => {
+
+    document.getElementById('muniSelector').value = '';
+
+    document.getElementById('caseworkerSelector').value = '';
+
+    populateMuniDropdown();
+
+    updateCaseworkerDropdown();
+
+    executeAggregationPipeline();
+
+  });
+  
   document
     .getElementById('muniSelector')
     .addEventListener('change', () => {
