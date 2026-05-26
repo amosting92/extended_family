@@ -795,7 +795,15 @@ async function generateComprehensiveAIReport() {
 
     const ds = pdf_getFilteredDataset();
     const stats = pdf_computeStats(ds);
+    const adminPassword =
+      document
+        .getElementById('adminPasswordInput')
+        .value
+        .trim();
+
     const payload = {
+      action: 'generateAIReport',
+      adminPassword,
       meta: pdf_getContextMeta(),
       stats: {
         total: stats.total,
@@ -937,6 +945,16 @@ document.addEventListener('DOMContentLoaded', () => {
       to authorized administrative access.
 
       <br><br>
+
+      <div style="margin-top:16px;">
+        <label class="field-label" style="display:block; margin-bottom:8px; font-size:12px;">Admin Authorization Password</label>
+        <input
+          id="adminPasswordInput"
+          type="password"
+          placeholder="Enter Admin Authorization Password"
+          style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid #cbd5e1;background:#f8fafc;color:#0f172a;outline:none;"
+        />
+      </div>
 
       <div id="aiResponseContainer" style="display:none;margin-top:16px;padding:12px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;font-size:13px;color:#102a43;"></div>
 
