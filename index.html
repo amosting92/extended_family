@@ -98,71 +98,6 @@ a{color:inherit;text-decoration:none}
 @media(max-width:1024px){.grid-2{grid-template-columns:1fr}}
 @media(max-width:820px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto;flex-direction:row;padding:12px 16px}.sidebar-foot{display:none}.nav{flex-direction:row}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.kpi-grid{grid-template-columns:1fr}.filter-row-fields{min-width:100%}}
-
-/* MODAL */
-
-.modal-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(15,23,42,0.65);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-  padding:20px;
-  backdrop-filter:blur(3px);
-}
-
-.modal-overlay.active{
-  display:flex;
-}
-
-.modal-card{
-  width:100%;
-  max-width:460px;
-  background:#ffffff;
-  border-radius:20px;
-  padding:28px;
-  box-shadow:0 30px 80px rgba(0,0,0,0.25);
-  animation:modalPop .18s ease;
-  border:1px solid #dbeafe;
-}
-
-.modal-icon{
-  font-size:42px;
-  margin-bottom:14px;
-}
-
-.modal-title{
-  font-size:20px;
-  font-weight:800;
-  color:#102a43;
-  margin-bottom:14px;
-}
-
-.modal-body{
-  font-size:14px;
-  line-height:1.7;
-  color:#475569;
-}
-
-.modal-actions{
-  margin-top:24px;
-  display:flex;
-  justify-content:flex-end;
-}
-
-@keyframes modalPop{
-  from{
-    opacity:0;
-    transform:translateY(10px) scale(.97);
-  }
-
-  to{
-    opacity:1;
-    transform:translateY(0) scale(1);
-  }
-}
 </style>
 </head>
 <body>
@@ -207,20 +142,9 @@ a{color:inherit;text-decoration:none}
             <option value="">Select Municipality Level First...</option>
           </select>
         </div>
-        <div class="field">
-          <label class="field-label">Report Generation Mode</label>
-          <select id="reportTypeSelector">
-            <option value="standard">
-              General Summary Report
-            </option>
-            <option value="ai">
-              Comprehensive Report
-            </option>
-          </select>
-        </div>
       </div>
       <div class="action-box">
-        <button id="generateMemoBtn" class="btn btn-success">📄 Generate Summary Memo (PDF)</button>
+        <button id="generateMemoBtn" class="btn btn-success">📄 Generate Summary Report</button>
         <button id="refreshBtn" class="btn btn-primary">Refresh Metrics</button>
       </div>
     </div>
@@ -782,103 +706,6 @@ async function compileAndExportOfficialPDF() {
   }
 }
 
-async function generateComprehensiveAIReport() {
-  const btn = document.getElementById('generateMemoBtn');
-  const orig = btn.textContent;
-  const aiResponseContainer = document.getElementById('aiResponseContainer');
-
-  try {
-    btn.disabled = true;
-    btn.textContent = '⌛ Requesting AI narrative...';
-    aiResponseContainer.style.display = 'none';
-    aiResponseContainer.textContent = '';
-
-    const ds = pdf_getFilteredDataset();
-    const stats = pdf_computeStats(ds);
-    const adminPassword =
-      document
-        .getElementById('adminPasswordInput')
-        .value
-        .trim();
-
-    if (!adminPassword) {
-      alert('Admin authorization password is required.');
-      return;
-    }
-
-    const payload = {
-      action: 'generateAIReport',
-      adminPassword,
-      meta: pdf_getContextMeta(),
-      stats: {
-        total: stats.total,
-        complete: stats.complete,
-        incomplete: stats.incomplete,
-        invalid: stats.invalid,
-        pending: stats.pending
-      },
-      sampleRows: ds.slice(0, 20).map(r => ({
-        municipality: r.MUNICIPALITY || '',
-        barangay: r.BARANGAY || '',
-        ml_assigned: r.ML_ASSIGNED || '',
-        final_status: r.FINAL_STATUS || '',
-        reason_for_not_encoding: r.REASON_FOR_NOT_ENCODING || ''
-      }))
-    };
-
-    const url =
-      `${API_URL}?action=generateAIReport&payload=` +
-      encodeURIComponent(JSON.stringify(payload));
-
-    const response = await fetch(url);
-    const rawText = await response.text();
-    console.log('[AI RAW RESPONSE]', rawText);
-
-    let result;
-    try {
-      result = JSON.parse(rawText);
-    } catch (parseError) {
-      throw new Error('Invalid JSON response: ' + rawText);
-    }
-
-    if (!result.success) {
-      throw new Error(result.message || 'AI generation failed.');
-    }
-
-    const aiText = result.data || result.aiText || '';
-    console.log('AI narrative response:', aiText);
-    console.log(aiText);
-
-    aiResponseContainer.textContent = aiText || 'AI response received successfully.';
-    aiResponseContainer.style.display = 'block';
-
-    alert('AI response received. Check the console or the modal for the narrative.');
-  } catch (error) {
-    console.error('[AI Report] Error:', error);
-    alert('AI report request failed. See console for details.');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = orig;
-  }
-}
-
-// ── AI ACCESS MODAL ─────────────────────────────────────
-
-function openAIRestrictionModal() {
-  document
-    .getElementById('aiAccessModal')
-    .classList
-    .add('active');
-}
-
-function closeAIRestrictionModal() {
-  document
-    .getElementById('aiAccessModal')
-    .classList
-    .remove('active');
-}
-
-
 // ── EVENT WIRING ───────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -891,41 +718,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // REPORT GENERATION
   document
     .getElementById('generateMemoBtn')
-    .addEventListener('click', () => {
-
-      const reportType =
-        document.getElementById('reportTypeSelector').value;
-
-      // STANDARD REPORT
-      if (reportType === 'standard') {
-        compileAndExportOfficialPDF();
-        return;
-      }
-
-      // AI REPORT
-      openAIRestrictionModal();
-      return;
-    });
-
-  // MODAL ACTION: REQUEST AI REPORT
-  document
-    .getElementById('requestAIReportBtn')
-    .addEventListener('click', generateComprehensiveAIReport);
-
-  // MODAL CLOSE
-  document
-    .getElementById('closeModalBtn')
-    .addEventListener('click', closeAIRestrictionModal);
-
-  // CLICK OUTSIDE MODAL
-  document
-    .getElementById('aiAccessModal')
-    .addEventListener('click', (e) => {
-
-      if (e.target.id === 'aiAccessModal') {
-        closeAIRestrictionModal();
-      }
-    });
+    .addEventListener('click', compileAndExportOfficialPDF);
 
   // FILTER EVENTS
   document
@@ -948,57 +741,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- AI REPORT ACCESS MODAL -->
-<div id="aiAccessModal" class="modal-overlay">
-  <div class="modal-card">
-
-    <div class="modal-icon">⚠️</div>
-
-    <div class="modal-title">
-      Restricted Report Access
-    </div>
-
-    <div class="modal-body">
-      Comprehensive Report generation is restricted
-      to authorized administrative access.
-
-      <br><br>
-
-      <div style="margin-top:16px;">
-        <label class="field-label" style="display:block; margin-bottom:8px; font-size:12px;">Admin Authorization Password</label>
-        <input
-          id="adminPasswordInput"
-          type="password"
-          placeholder="Enter Admin Authorization Password"
-          style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid #cbd5e1;background:#f8fafc;color:#0f172a;outline:none;"
-        />
-      </div>
-
-      <div id="aiResponseContainer" style="display:none;margin-top:16px;padding:12px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;font-size:13px;color:#102a43;"></div>
-
-      <br><br>
-
-      Please contact:
-
-      <br><br>
-
-      <strong>CBDO Lio Soliven</strong>
-
-      <br><br>
-
-      for access requests or Comprehensive Report generation.
-    </div>
-
-    <div class="modal-actions">
-      <button id="requestAIReportBtn" class="btn btn-success">
-        Request AI Narrative
-      </button>
-      <button id="closeModalBtn" class="btn btn-primary">
-        Understood
-      </button>
-    </div>
-
-  </div>
-</div>
 </body>
 </html>
