@@ -831,13 +831,21 @@ async function generateComprehensiveAIReport() {
       encodeURIComponent(JSON.stringify(payload));
 
     const response = await fetch(url);
-    const body = await response.json();
+    const rawText = await response.text();
+    console.log('[AI RAW RESPONSE]', rawText);
 
-    if (!response.ok || body.success === false) {
-      throw new Error(body.message || 'AI report request failed');
+    let result;
+    try {
+      result = JSON.parse(rawText);
+    } catch (parseError) {
+      throw new Error('Invalid JSON response: ' + rawText);
     }
 
-    const aiText = body.data || body.aiText || '';
+    if (!result.success) {
+      throw new Error(result.message || 'AI generation failed.');
+    }
+
+    const aiText = result.data || result.aiText || '';
     console.log('AI narrative response:', aiText);
     console.log(aiText);
 
