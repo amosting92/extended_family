@@ -213,142 +213,350 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbxx4y8UYT86Mx4XH5FktCyw
 let centralRecordsCache = [];
 let activeChartInstance = null;
 
-// ── DASHBOARD ENGINE (original, unchanged) ────────────────────────────────────
+// ── DASHBOARD ENGINE ─────────────────────────────────────────────────────────
 
 async function syncControlDashboard() {
+
   try {
-    document.getElementById('updatedAt').textContent = 'Synchronizing live database stream...';
-    const res  = await fetch(`${API_URL}?action=records`, { method:'GET', redirect:'follow' });
-    const body = await res.json();
-    if (!res.ok || body.success === false) throw new Error();
-    centralRecordsCache = body.data || [];
-    populateClusterDropdown();
-    populateMuniDropdown();
-    executeAggregationPipeline();
-    document.getElementById('updatedAt').textContent = `Last synchronized: ${new Date().toLocaleTimeString()}`;
-  } catch(e) {
+
     document.getElementById('updatedAt').textContent =
-  'Live data connection temporarily unavailable.';
+      'Synchronizing live database stream...';
+
+    const res = await fetch(
+      `${API_URL}?action=records`,
+      {
+        method: 'GET',
+        redirect: 'follow'
+      }
+    );
+
+    const body = await res.json();
+
+    if (!res.ok || body.success === false)
+      throw new Error();
+
+    centralRecordsCache = body.data || [];
+
+    populateClusterDropdown();
+
+    populateMuniDropdown();
+
+    updateCaseworkerDropdown();
+
+    executeAggregationPipeline();
+
+    document.getElementById('updatedAt').textContent =
+      `Last synchronized: ${new Date().toLocaleTimeString()}`;
+
+  }
+
+  catch (e) {
+
+    console.error(e);
+
+    document.getElementById('updatedAt').textContent =
+      'Live data connection temporarily unavailable.';
   }
 }
 
+
+// ── CLUSTER DROPDOWN ────────────────────────────────────────────────────────
+
 function populateClusterDropdown() {
 
-  const sel = document.getElementById('clusterSelector');
+  const sel =
+    document.getElementById('clusterSelector');
 
-  const current = sel.value;
+  const current =
+    sel.value;
 
   const clusters = [
+
     ...new Set(
       centralRecordsCache.map(r => r.CLUSTER)
     )
+
   ]
   .filter(Boolean)
   .sort();
 
   sel.innerHTML =
+
     '<option value="">ALL CLUSTERS</option>' +
 
     clusters.map(c =>
-      `<option value="${c}">${c.toUpperCase()}</option>`
+
+      `<option value="${c}">
+        ${c.toUpperCase()}
+      </option>`
+
     ).join('');
 
   if (clusters.includes(current)) {
+
     sel.value = current;
+
   }
+
 }
+
+
+// ── MUNICIPALITY DROPDOWN ───────────────────────────────────────────────────
+
+function populateMuniDropdown() {
+
+  const cluster =
+
+    document.getElementById('clusterSelector').value;
+
+  const sel =
+
+    document.getElementById('muniSelector');
+
+  const current =
+    sel.value;
+
+  let source =
+    centralRecordsCache;
+
+  if (cluster) {
+
+    source = source.filter(
+      r => r.CLUSTER === cluster
+    );
+
+  }
+
+  const munis = [
+
+    ...new Set(
+      source.map(r => r.MUNICIPALITY)
+    )
+
+  ]
+  .filter(Boolean)
+  .sort();
+
+  sel.innerHTML =
+
+    '<option value="">PROVINCIAL OVERVIEW (All Palawan Locations)</option>' +
+
+    munis.map(m =>
+
+      `<option value="${m}">
+        ${m.toUpperCase()}
+      </option>`
+
+    ).join('');
+
+  if (munis.includes(current)) {
+
+    sel.value = current;
+
+  }
+
+}
+
+
+// ── CASEWORKER DROPDOWN ─────────────────────────────────────────────────────
 
 function updateCaseworkerDropdown() {
-  const muni = document.getElementById('muniSelector').value;
-  const csel = document.getElementById('caseworkerSelector');
-  if (!muni) { csel.disabled = true; csel.innerHTML = '<option value="">Select Municipality Level First...</option>'; return; }
-  const cluster =
-  document.getElementById('clusterSelector').value;
 
-let source = centralRecordsCache;
+  const muni =
 
-if (cluster) {
+    document.getElementById('muniSelector').value;
 
-  source = source.filter(
-    r => r.CLUSTER === cluster
-  );
+  const csel =
 
-}
+    document.getElementById('caseworkerSelector');
 
-const munis = [
-  ...new Set(
-    source.map(r => r.MUNICIPALITY)
-  )
-]
-.filter(Boolean)
-.sort();
+  if (!muni) {
+
+    csel.disabled = true;
+
+    csel.innerHTML =
+      '<option value="">Select Municipality Level First...</option>';
+
+    return;
+
+  }
+
+  const mls = [
+
+    ...new Set(
+
+      centralRecordsCache
+
+        .filter(r => r.MUNICIPALITY === muni)
+
+        .map(r => r.ML_ASSIGNED)
+
+    )
+
+  ]
+  .filter(Boolean)
+  .sort();
+
   csel.disabled = false;
-  csel.innerHTML = '<option value="">ALL CASEWORKER ASSIGNMENTS (Cluster Summary)</option>' +
-    mls.map(ml => `<option value="${ml}">👤 ML LINK: ${ml.toUpperCase()}</option>`).join('');
+
+  csel.innerHTML =
+
+    '<option value="">ALL CASEWORKER ASSIGNMENTS (Cluster Summary)</option>' +
+
+    mls.map(ml =>
+
+      `<option value="${ml}">
+        👤 ML LINK: ${ml.toUpperCase()}
+      </option>`
+
+    ).join('');
+
 }
+
+
+// ── MAIN AGGREGATION ENGINE ────────────────────────────────────────────────
 
 function executeAggregationPipeline() {
+
   const clusterFocus =
-  document.getElementById('clusterSelector').value;
+
+    document.getElementById('clusterSelector').value;
+
   const muniFocus =
-  document.getElementById('muniSelector').value;
+
+    document.getElementById('muniSelector').value;
+
   const workerFocus =
-  document.getElementById('caseworkerSelector').value;
-  let ds = centralRecordsCache;
-  if (clusterFocus) ds = ds.filter(r => r.CLUSTER === clusterFocus);
-  if (muniFocus) ds = ds.filter(r => r.MUNICIPALITY === muniFocus);
-  if (workerFocus) ds = ds.filter(r => r.ML_ASSIGNED  === workerFocus);
+
+    document.getElementById('caseworkerSelector').value;
+
+  let ds =
+    centralRecordsCache;
+
+  if (clusterFocus) {
+
+    ds = ds.filter(
+      r => r.CLUSTER === clusterFocus
+    );
+
+  }
+
+  if (muniFocus) {
+
+    ds = ds.filter(
+      r => r.MUNICIPALITY === muniFocus
+    );
+
+  }
+
+  if (workerFocus) {
+
+    ds = ds.filter(
+      r => r.ML_ASSIGNED === workerFocus
+    );
+
+  }
 
   const total = ds.length;
-  let complete = 0, incomplete = 0, invalid = 0, pending = 0;
+
+  let complete = 0;
+  let incomplete = 0;
+  let invalid = 0;
+  let pending = 0;
+
   ds.forEach(r => {
 
-  const raw = r.FINAL_STATUS;
-  const s = String(raw || '')
-    .trim()
-    .toUpperCase();
+    const raw = r.FINAL_STATUS;
 
-  console.log('RAW STATUS:', raw);
-  console.log('PARSED STATUS:', s);
+    const s = String(raw || '')
+      .trim()
+      .toUpperCase();
 
-  if (s === 'COMPLETE') {
-    complete++;
-  }
-  else if (s === 'INCOMPLETE') {
-    incomplete++;
-  }
-  else if (s === 'INVALID') {
-    invalid++;
-  }
-  else {
-    pending++;
-  }
+    if (s === 'COMPLETE') {
 
-});
+      complete++;
 
-  document.getElementById('kpiTotal').textContent      = total.toLocaleString();
-  document.getElementById('kpiComplete').textContent   = complete.toLocaleString();
-  document.getElementById('kpiIncomplete').textContent = incomplete.toLocaleString();
-  document.getElementById('kpiInvalid').textContent    = invalid.toLocaleString();
-  document.getElementById('kpiPending').textContent    = pending.toLocaleString();
-  document.getElementById('pctComplete').textContent   = `${total===0?0:((complete/total)*100).toFixed(1)}% of scope`;
-  document.getElementById('pctIncomplete').textContent = `${total===0?0:((incomplete/total)*100).toFixed(1)}% of scope`;
-  document.getElementById('pctInvalid').textContent    = `${total===0?0:((invalid/total)*100).toFixed(1)}% of scope`;
-  document.getElementById('pctPending').textContent    = `${total===0?0:((pending/total)*100).toFixed(1)}% of scope`;
-  document.getElementById('subTotal').textContent      = (muniFocus||workerFocus) ? 'Isolate dataset metrics' : '100% scope volume';
+    }
 
-  renderDoughnutChart(complete, incomplete, invalid, pending);
-  renderRankingsPanel(ds, muniFocus, workerFocus);
+    else if (s === 'INCOMPLETE') {
+
+      incomplete++;
+
+    }
+
+    else if (s === 'INVALID') {
+
+      invalid++;
+
+    }
+
+    else {
+
+      pending++;
+
+    }
+
+  });
+
+  document.getElementById('kpiTotal').textContent =
+    total.toLocaleString();
+
+  document.getElementById('kpiComplete').textContent =
+    complete.toLocaleString();
+
+  document.getElementById('kpiIncomplete').textContent =
+    incomplete.toLocaleString();
+
+  document.getElementById('kpiInvalid').textContent =
+    invalid.toLocaleString();
+
+  document.getElementById('kpiPending').textContent =
+    pending.toLocaleString();
+
+  document.getElementById('pctComplete').textContent =
+    `${total === 0 ? 0 : ((complete / total) * 100).toFixed(1)}% of scope`;
+
+  document.getElementById('pctIncomplete').textContent =
+    `${total === 0 ? 0 : ((incomplete / total) * 100).toFixed(1)}% of scope`;
+
+  document.getElementById('pctInvalid').textContent =
+    `${total === 0 ? 0 : ((invalid / total) * 100).toFixed(1)}% of scope`;
+
+  document.getElementById('pctPending').textContent =
+    `${total === 0 ? 0 : ((pending / total) * 100).toFixed(1)}% of scope`;
+
+  document.getElementById('subTotal').textContent =
+
+    (clusterFocus || muniFocus || workerFocus)
+
+      ? 'Filtered operational scope'
+
+      : '100% scope volume';
+
+  renderDoughnutChart(
+    complete,
+    incomplete,
+    invalid,
+    pending
+  );
+
+  renderRankingsPanel(
+    ds,
+    muniFocus,
+    workerFocus
+  );
+
   generateDynamicAlerts(
-  ds,
-  muniFocus,
-  workerFocus,
-  complete,
-  incomplete,
-  invalid,
-  pending,
-  total
-);
+    ds,
+    muniFocus,
+    workerFocus,
+    complete,
+    incomplete,
+    invalid,
+    pending,
+    total
+  );
+
 }
 
 function renderDoughnutChart(c, inc, inv, p) {
