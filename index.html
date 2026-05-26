@@ -122,8 +122,8 @@ a{color:inherit;text-decoration:none}
   <main class="main">
     <header class="topbar">
       <div>
-        <h1 class="page-title">Operational Control Board</h1>
-        <p class="page-sub muted">Cascading data filtration matrix dashboard for targeted caseworker evaluations.</p>
+        <h1 class="page-title">Extended Family Validation Monitoring Dashboard</h1>
+        <p class="page-sub muted">Real-time monitoring of validation progress, encoding status, and operational backlogs.</p>
       </div>
       <div id="updatedAt" class="muted small" style="text-align:right;font-weight:600;">Syncing baseline...</div>
     </header>
@@ -190,8 +190,8 @@ a{color:inherit;text-decoration:none}
 
     <div class="card">
       <div class="card-head">
-        <h2 class="card-title">📋 Automated Data Analysis & Operational Critical Alerts</h2>
-        <span class="muted small">Real-time systemic target evaluation</span>
+        <h2 class="card-title">📋 Validation Analysis & Operational Alerts</h2>
+        <span class="muted small">Real-time monitoring of validation issues and operational backlogs</span>
       </div>
       <div id="analysisPanel" class="analysis-panel">
         <div class="muted">Evaluating caseload variables and mapping cluster flags...</div>
@@ -351,11 +351,11 @@ function renderRankingsPanel(dataset, muni, worker) {
   };
 
   if (!muni) {
-    cardTitle.textContent = 'Municipality Rankings (Top 5 Allocation Tracks)';
-    container.innerHTML = buildBlocks(makeGroups('MUNICIPALITY'), 'Highest Completion (Municipal Scale)', 'Lowest Completion (Municipal Scale)');
+    cardTitle.textContent = 'Municipality Validation Performance';
+    container.innerHTML = buildBlocks(makeGroups('MUNICIPALITY'), 'Highest Validation Completion', 'Areas Requiring Follow-up');
   } else {
     cardTitle.textContent = worker ? `Caseworker: ${worker.toUpperCase()} — Barangay Breakdown` : `${muni} Cluster: Barangay Performance Rankings`;
-    container.innerHTML = buildBlocks(makeGroups('BARANGAY'), 'Highest Completion (Barangay Level)', 'Lowest Completion (Barangay Level)');
+    container.innerHTML = buildBlocks(makeGroups('BARANGAY'), 'Highest Barangay Completion', 'Barangays Requiring Follow-up');
   }
 }
 
@@ -366,19 +366,103 @@ function generateDynamicAlerts(dataset, muni, worker, complete, incomplete, pend
   let ctx     = 'Provincial Level Overview';
   if (muni) ctx = worker ? `Caseworker Focus: ${worker.toUpperCase()}` : `${muni} Cluster Level`;
 
-  if      (rate < 50) html += `<div class="insight-row insight-danger"><div class="insight-icon">🚨</div><div><div class="insight-title">${ctx}: Critical Velocity Warning (${rate}%)</div><div class="insight-desc">Operational output bounds are tracking heavily behind schedule limits. Strict monitoring and technical assistance workflows should be activated immediately.</div></div></div>`;
-  else if (rate < 85) html += `<div class="insight-row insight-warning"><div class="insight-icon">⚠️</div><div><div class="insight-title">${ctx}: Moderate Progress Output Grid (${rate}%)</div><div class="insight-desc">Pacing configurations are stable. Direct support parameters toward active data backlogs to complete clearance targets safely.</div></div></div>`;
-  else                html += `<div class="insight-row insight-success"><div class="insight-icon">✅</div><div><div class="insight-title">${ctx}: High Operations Compliance (${rate}%)</div><div class="insight-desc">Excellent tracking turnaround. Current processing lines demonstrate highly effective field velocity profiles.</div></div></div>`;
+  if (rate < 50)
 
-  const pendingMap={}, incompleteMap={}, brgyMap={};
+  html += `
+    <div class="insight-row insight-danger">
+      <div class="insight-icon">🚨</div>
+      <div>
+        <div class="insight-title">
+          ${ctx}: Critical Validation Delay (${rate}%)
+        </div>
+
+        <div class="insight-desc">
+          Validation completion is critically below the expected operational target. Immediate monitoring and support intervention is recommended.
+        </div>
+      </div>
+    </div>
+  `;
+
+else if (rate < 85)
+
+  html += `
+    <div class="insight-row insight-warning">
+      <div class="insight-icon">⚠️</div>
+      <div>
+        <div class="insight-title">
+          ${ctx}: Validation Progress Monitoring (${rate}%)
+        </div>
+
+        <div class="insight-desc">
+          Current validation activity remains active, but several backlogs still require follow-up and encoding support.
+        </div>
+      </div>
+    </div>
+  `;
+
+else
+
+  html += `
+    <div class="insight-row insight-success">
+      <div class="insight-icon">✅</div>
+      <div>
+        <div class="insight-title">
+          ${ctx}: High Validation Completion (${rate}%)
+        </div>
+
+        <div class="insight-desc">
+          Most assigned records have already been processed and validated successfully. Remaining records are within manageable levels.
+        </div>
+      </div>
+    </div>
+  `;
+  const pendingMap={}, incompleteMap={}, invalidMap={}, brgyMap={};
   dataset.forEach(r => {
-    const s=String(r.FINAL_STATUS||'').toUpperCase(), m=r.MUNICIPALITY||'UNKNOWN', ml=r.ML_ASSIGNED||'UNASSIGNED', bKey=`${m} — ${r.BARANGAY||'UNKNOWN'}`;
-    if(s==='PENDING')    { if(!pendingMap[m])    pendingMap[m]={};    pendingMap[m][ml]    =(pendingMap[m][ml]||0)+1; }
-    if(s==='INCOMPLETE') { if(!incompleteMap[m]) incompleteMap[m]={}; incompleteMap[m][ml] =(incompleteMap[m][ml]||0)+1; }
-    if(!brgyMap[bKey]) brgyMap[bKey]={total:0,complete:0};
-    brgyMap[bKey].total++;
-    if(s==='COMPLETE') brgyMap[bKey].complete++;
-  });
+
+  const s = String(r.FINAL_STATUS || '')
+    .trim()
+    .toUpperCase();
+
+  const m  = r.MUNICIPALITY || 'UNKNOWN';
+  const ml = r.ML_ASSIGNED || 'UNASSIGNED';
+
+  const bKey = `${m} — ${r.BARANGAY || 'UNKNOWN'}`;
+
+  if (s === 'PENDING') {
+
+    if (!pendingMap[m]) pendingMap[m] = {};
+    pendingMap[m][ml] = (pendingMap[m][ml] || 0) + 1;
+
+  }
+
+  else if (s === 'INCOMPLETE') {
+
+    if (!incompleteMap[m]) incompleteMap[m] = {};
+    incompleteMap[m][ml] = (incompleteMap[m][ml] || 0) + 1;
+
+  }
+
+  else if (s === 'INVALID') {
+
+    if (!invalidMap[m]) invalidMap[m] = {};
+    invalidMap[m][ml] = (invalidMap[m][ml] || 0) + 1;
+
+  }
+
+  if (!brgyMap[bKey]) {
+    brgyMap[bKey] = {
+      total: 0,
+      complete: 0
+    };
+  }
+
+  brgyMap[bKey].total++;
+
+  if (s === 'COMPLETE') {
+    brgyMap[bKey].complete++;
+  }
+
+});
 
   function buildNestedAlert(mapData, icon, title, desc, cls) {
     const muniTotals=[];
@@ -393,8 +477,46 @@ function generateDynamicAlerts(dataset, muni, worker, complete, incomplete, pend
     return `<div class="insight-row ${cls}"><div class="insight-icon">${icon}</div><div style="flex:1"><div class="insight-title">${title}</div><div class="insight-desc">${desc}${nested}</div></div></div>`;
   }
 
-  if(pending>0)    html+=buildNestedAlert(pendingMap,    '📌',`Technical Support Required: Field Validation Backlogs (${pending.toLocaleString()} Total)`,    'The following clusters and their top caseworkers have the highest volume of unvalidated records:','insight-danger');
-  if(incomplete>0) html+=buildNestedAlert(incompleteMap, '⏳',`System Sync Alert: RELIC Processing Backlogs (${incomplete.toLocaleString()} Total)`, 'Forms are verified physically but missing digital system encoding. Top priority sync needed for these staff:','insight-warning');
+  if(pending>0)
+
+  html += buildNestedAlert(
+
+    pendingMap,
+
+    '📌',
+
+    `Pending Validation Records (${pending.toLocaleString()} Total)`,
+
+    'The following clusters and assigned staff currently hold the highest number of pending validation records:',
+
+    'insight-danger'
+
+  );
+
+  if(incomplete>0)
+
+  html += buildNestedAlert(
+
+    incompleteMap,
+
+    '⏳',
+
+    `RELIC Encoding Backlogs (${incomplete.toLocaleString()} Total)`,
+
+    'These records were already validated in the field but are not yet encoded in the RELIC system:',
+
+    'insight-warning'
+
+  );
+
+if(invalid > 0)
+  html += buildNestedAlert(
+    invalidMap,
+    '🧩',
+    `Invalid Records Requiring Review (${invalid.toLocaleString()} Total)`,
+    'The following clusters contain records with validation conflicts or incomplete data that require review and correction:',
+    'insight-danger'
+  );
 
   if (!worker) {
     const slow=Object.entries(brgyMap).map(([name,d])=>({name,total:d.total,done:d.complete,rate:d.total===0?0:Math.round((d.complete/d.total)*100)})).filter(b=>b.rate<45&&b.total>=2).sort((a,b)=>a.rate-b.rate).slice(0,5);
@@ -472,17 +594,30 @@ function pdf_captureChart() {
 
 // UTIL: Qualitative labels
 function pdf_topLabel(r){ return r>=92?'Clean tracking data':r>=85?'On-schedule submission':r>=78?'High verification velocity':r>=70?'Minimal encoding backlogs':r>=62?'Stable pace management':'Active clearance in progress'; }
-function pdf_bottomLabel(r){ return r<25?'Critical operational bottleneck':r<32?'Severe pending caseloads':r<38?'Logistical transmission delays':r<44?'High RELIC synchronization gaps':r<50?'Unassigned tracking targets':'Slow field validation turnaround'; }
+function pdf_bottomLabel(r){ return r<25?'Critical operational bottleneck':r<32?'Severe pending caseloads':r<38?'Logistical transmission delays':r<44?'High RELIC encoding backlogs':r<50?'Unassigned tracking targets':'Slow field validation turnaround'; }
 
 // UTIL: Narrative completion phrase
 function pdf_completionPhrase(r){
-  if(r>=90) return 'demonstrating excellent operational throughput ahead of target milestones';
-  if(r>=80) return 'indicating strong field velocity with minor residual backlogs remaining';
-  if(r>=70) return 'reflecting steady velocity but signaling a need to accelerate remaining field audits';
-  if(r>=60) return 'indicating steady velocity but signaling a critical need to expedite the remaining field audits before the upcoming phase deadline';
-  if(r>=50) return 'tracking at moderate pace with significant backlogs requiring immediate technical support activation';
-  if(r>=35) return 'tracking heavily behind schedule limits — strict monitoring and technical assistance workflows required immediately';
-  return 'in critical operational deficit — emergency field mobilization protocols should be activated without delay';
+
+  if(r >= 90)
+    return 'Most assigned records have already been completed and encoded successfully.';
+
+  if(r >= 80)
+    return 'Validation activities are progressing well, with manageable remaining backlogs.';
+
+  if(r >= 70)
+    return 'Validation progress remains stable, although several records still require follow-up and encoding support.';
+
+  if(r >= 60)
+    return 'Current progress indicates that additional monitoring and processing support may still be needed.';
+
+  if(r >= 50)
+    return 'Validation progress is below the expected operational target and requires closer monitoring.';
+
+  if(r >= 35)
+    return 'Validation activities are significantly behind target and may require immediate intervention.';
+
+  return 'Validation progress is critically delayed and requires urgent operational action.';
 }
 
 // SEC HEADER helper
@@ -505,14 +640,14 @@ function pdf_buildExecutiveSummary(meta, stats, chartDataUrl) {
     : '';
 
   const note = incomplete>0
-    ? `<div style="background:#fffbeb;border:1px solid #fcd34d;border-left:4px solid #d97706;border-radius:4px;padding:8px 12px;font-size:10px;margin-top:10px;line-height:1.6;"><strong>Data Insight Note:</strong> While <strong>${rStr}%</strong> of the records have successfully cleared both the physical paper confirmation and system encoding tracks, there is a <strong>${pct(incomplete)}% synchronization gap</strong> representing data that is approved on paper but completely missing from the live RELIC system core.</div>`
+    ? `<div style="background:#fffbeb;border:1px solid #fcd34d;border-left:4px solid #d97706;border-radius:4px;padding:8px 12px;font-size:10px;margin-top:10px;line-height:1.6;"><strong>Operational Note:</strong> While <strong>${rStr}%</strong> of the records have successfully cleared both the physical paper confirmation and system encoding tracks, there is a <strong>${pct(incomplete)}% encoding backlog</strong> representing records that were already validated in the field but are still pending encoding in the RELIC system.</div>`
     : '';
 
   return pdf_secHead(1,`Executive Summary (${meta.scopeType} Milestones)`) + `
     <div style="font-size:11px;line-height:1.7;">
       ${chart}
       <p style="margin:0 0 8px;">As of ${ts}, the data management unit has compiled the automated cross-verification logs for the <strong>Extended Family Validation (EFV)</strong> tracking assignment ${where}.</p>
-      <p style="margin:0 0 10px;">The baseline figures display a <strong>${meta.scopeType} Completion Rate of ${rStr}%</strong>, ${pdf_completionPhrase(rate)}.</p>
+      <p style="margin:0 0 10px;">  Current monitoring data shows a  <strong>${meta.scopeType} Completion Rate of ${rStr}%</strong>.  ${pdf_completionPhrase(rate)}</p>
       <table style="width:100%;border-collapse:collapse;font-size:11px;">
         <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#f1f5f9;font-weight:700;">Total ${meta.muni?'Municipal':'Provincial'} Caseload Target:</td><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#f1f5f9;font-weight:700;text-align:right;">${total.toLocaleString()} Records (100% Allocation)</td></tr>
         <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;color:#15803d;font-weight:600;">Complete Status (Validated):</td><td style="padding:5px 10px;border:1px solid #e2e8f0;color:#15803d;font-weight:700;text-align:right;">${complete.toLocaleString()} Records (<strong>${rStr}%</strong> of total)</td></tr>
@@ -670,7 +805,7 @@ function pdf_assembleDocument(meta, stats, ds, chartDataUrl) {
     <div style="font-size:9px;font-weight:700;letter-spacing:1px;color:#475569;text-transform:uppercase;margin-bottom:1px;">Department of Social Welfare and Development</div>
     <div style="font-size:9px;color:#64748b;margin-bottom:10px;">Pantawid Pamilyang Pilipino Program (4Ps) &bull; Palawan Field Operations</div>
     <div style="font-size:17px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Extended Family Validation (EFV)</div>
-    <div style="font-size:12px;font-weight:700;color:#334e68;">Field Validation &amp; RELIC Encoding &mdash; Operational Progress Report</div>
+    <div style="font-size:12px;font-weight:700;color:#334e68;">Field Validation and RELIC Encoding Progress Report</div>
     <div style="font-size:9px;color:#94a3b8;margin-top:6px;">REPORT REF: ${ref} &nbsp;|&nbsp; GENERATED: ${ts}</div>
   </div>
   <table style="width:100%;font-size:11px;margin-bottom:16px;border-collapse:collapse;border:1px solid #e2e8f0;background:#f8fafc;">
