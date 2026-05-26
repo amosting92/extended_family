@@ -813,12 +813,11 @@ async function generateComprehensiveAIReport() {
       }))
     };
 
-    const response = await fetch(`${API_URL}?action=generateAIReport`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    const url =
+      `${API_URL}?action=generateAIReport&payload=` +
+      encodeURIComponent(JSON.stringify(payload));
 
+    const response = await fetch(url);
     const body = await response.json();
 
     if (!response.ok || body.success === false) {
