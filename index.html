@@ -801,6 +801,11 @@ async function generateComprehensiveAIReport() {
         .value
         .trim();
 
+    if (!adminPassword) {
+      alert('Admin authorization password is required.');
+      return;
+    }
+
     const payload = {
       action: 'generateAIReport',
       adminPassword,
@@ -878,7 +883,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // REPORT GENERATION
   document
     .getElementById('generateMemoBtn')
-    .addEventListener('click', async () => {
+    .addEventListener('click', () => {
 
       const reportType =
         document.getElementById('reportTypeSelector').value;
@@ -891,8 +896,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // AI REPORT
       openAIRestrictionModal();
-      await generateComprehensiveAIReport();
+      return;
     });
+
+  // MODAL ACTION: REQUEST AI REPORT
+  document
+    .getElementById('requestAIReportBtn')
+    .addEventListener('click', generateComprehensiveAIReport);
 
   // MODAL CLOSE
   document
@@ -972,6 +982,9 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     <div class="modal-actions">
+      <button id="requestAIReportBtn" class="btn btn-success">
+        Request AI Narrative
+      </button>
       <button id="closeModalBtn" class="btn btn-primary">
         Understood
       </button>
