@@ -983,9 +983,29 @@ function pdf_buildExecutiveSummary(meta, stats, chartDataUrl) {
   const rStr = rate.toFixed(1);
   const pct  = (n) => total===0?'0.0':((n/total)*100).toFixed(1);
   const ts   = new Date().toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
-  let where  = 'across the Province of Palawan';
-  if(meta.muni&&meta.worker) where=`under Caseworker ${meta.worker.toUpperCase()} in ${meta.muni} Cluster`;
-  else if(meta.muni)         where=`across the ${meta.muni} Municipality Cluster`;
+  let where =
+  'across the Province of Palawan';
+
+if (meta.cluster && !meta.muni) {
+
+  where =
+    `across ${meta.cluster.toUpperCase()}`;
+
+}
+
+if (meta.muni && !meta.worker) {
+
+  where =
+    `across the Municipality of ${meta.muni.toUpperCase()}`;
+
+}
+
+if (meta.muni && meta.worker) {
+
+  where =
+    `under Caseworker ${meta.worker.toUpperCase()} in ${meta.muni.toUpperCase()}`;
+
+}
 
   const chart = chartDataUrl
     ? `<img src="${chartDataUrl}" style="float:right;width:155px;height:auto;border:1px solid #e2e8f0;border-radius:6px;padding:6px;background:#fff;margin:0 0 10px 16px;"/>`
@@ -1001,7 +1021,7 @@ function pdf_buildExecutiveSummary(meta, stats, chartDataUrl) {
       <p style="margin:0 0 8px;">As of ${ts}, the data management unit has compiled the automated cross-verification logs for the <strong>Extended Family Validation (EFV)</strong> tracking assignment ${where}.</p>
       <p style="margin:0 0 10px;">  Current monitoring data shows a  <strong>${meta.scopeType} Completion Rate of ${rStr}%</strong>.  ${pdf_completionPhrase(rate)}</p>
       <table style="width:100%;border-collapse:collapse;font-size:11px;">
-        <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#f1f5f9;font-weight:700;">Total ${meta.muni?'Municipal':'Provincial'} Caseload Target:</td><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#f1f5f9;font-weight:700;text-align:right;">${total.toLocaleString()} Records (100% Allocation)</td></tr>
+        <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#f1f5f9;font-weight:700;">Total ${meta.worker? 'Caseworker': meta.muni? 'Municipal': meta.cluster? 'Cluster' : 'Provincial'} Caseload Target:</td><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#f1f5f9;font-weight:700;text-align:right;">${total.toLocaleString()} Records (100% Allocation)</td></tr>
         <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;color:#15803d;font-weight:600;">Complete Status (Validated):</td><td style="padding:5px 10px;border:1px solid #e2e8f0;color:#15803d;font-weight:700;text-align:right;">${complete.toLocaleString()} Records (<strong>${rStr}%</strong> of total)</td></tr>
         <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#fffbf5;color:#c2410c;font-weight:600;">Incomplete Status (RELIC Discrepancy&mdash;Sync Lag):</td><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#fffbf5;color:#c2410c;font-weight:700;text-align:right;">${incomplete.toLocaleString()} Records (<strong>${pct(incomplete)}%</strong> of total)</td></tr>
         <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;color:#475569;font-weight:600;">Invalid Status (Data Discrepancy/Conflict):</td><td style="padding:5px 10px;border:1px solid #e2e8f0;color:#475569;font-weight:700;text-align:right;">${invalid.toLocaleString()} Records (<strong>${pct(invalid)}%</strong> of total)</td></tr>
