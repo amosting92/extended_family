@@ -220,7 +220,8 @@ async function syncControlDashboard() {
     executeAggregationPipeline();
     document.getElementById('updatedAt').textContent = `Last synchronized: ${new Date().toLocaleTimeString()}`;
   } catch(e) {
-    document.getElementById('updatedAt').textContent = 'Database sync dropped.';
+    document.getElementById('updatedAt').textContent =
+  'Live data connection temporarily unavailable.';
   }
 }
 
@@ -295,7 +296,16 @@ function executeAggregationPipeline() {
 
   renderDoughnutChart(complete, incomplete, invalid, pending);
   renderRankingsPanel(ds, muniFocus, workerFocus);
-  generateDynamicAlerts(ds, muniFocus, workerFocus, complete, incomplete, pending, total);
+  generateDynamicAlerts(
+  ds,
+  muniFocus,
+  workerFocus,
+  complete,
+  incomplete,
+  invalid,
+  pending,
+  total
+);
 }
 
 function renderDoughnutChart(c, inc, inv, p) {
@@ -359,7 +369,7 @@ function renderRankingsPanel(dataset, muni, worker) {
   }
 }
 
-function generateDynamicAlerts(dataset, muni, worker, complete, incomplete, pending, total) {
+function generateDynamicAlerts(dataset, muni, worker, complete, incomplete, invalid, pending, total) {
   const panel = document.getElementById('analysisPanel');
   let html    = '';
   const rate  = total===0?0:((complete/total)*100).toFixed(1);
