@@ -806,7 +806,13 @@ function pdf_buildRecommendations(meta, stats, ds) {
 }
 
 // ASSEMBLER: Stitch all sections into final PDF document HTML
-function pdf_assembleDocument(meta, stats, ds, chartDataUrl) {
+function pdf_assembleDocument(
+  meta,
+  stats,
+  ds,
+  chartDataUrl,
+  memoTo
+) {
   const now=new Date(), ts=now.toLocaleString('en-PH',{dateStyle:'long',timeStyle:'medium'});
   const ref=`EFV-${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
   return `<div style="padding:36px 44px;background:#ffffff;color:#0f172a;font-family:'Helvetica','Arial',sans-serif;font-size:12px;line-height:1.6;max-width:760px;margin:0 auto;">
@@ -819,7 +825,7 @@ function pdf_assembleDocument(meta, stats, ds, chartDataUrl) {
     <div style="font-size:9px;color:#94a3b8;margin-top:6px;">REPORT REF: ${ref} &nbsp;|&nbsp; GENERATED: ${ts}</div>
   </div>
   <table style="width:100%;font-size:11px;margin-bottom:16px;border-collapse:collapse;border:1px solid #e2e8f0;background:#f8fafc;">
-    <tr><td style="padding:6px 12px;font-weight:700;width:130px;border-bottom:1px solid #e2e8f0;vertical-align:top;">MEMO TO:</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;">Provincial Link Operations Office / Technical Evaluation Unit</td></tr>
+    <tr><td style="padding:6px 12px;font-weight:700;width:130px;border-bottom:1px solid #e2e8f0;vertical-align:top;">MEMO TO:</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;">${memoTo}</td></tr>
     <tr><td style="padding:6px 12px;font-weight:700;border-bottom:1px solid #e2e8f0;vertical-align:top;">FROM:</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;">Beneficiary Data Management Officer (BDMO) &mdash; Palawan</td></tr>
     <tr><td style="padding:6px 12px;font-weight:700;border-bottom:1px solid #e2e8f0;vertical-align:top;">SUBJECT:</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;">EFV Operational Progress Audit &mdash; Cascading Filtration Matrix Report</td></tr>
     <tr><td style="padding:6px 12px;font-weight:700;border-bottom:1px solid #e2e8f0;vertical-align:top;">SCOPE / FILTER:</td><td style="padding:6px 12px;font-weight:700;color:#102a43;border-bottom:1px solid #e2e8f0;">${meta.contextLabel}</td></tr>
@@ -846,13 +852,29 @@ async function compileAndExportOfficialPDF() {
   const btn=document.getElementById('generateMemoBtn'), orig=btn.textContent;
   btn.disabled=true; btn.textContent='⌛ Capturing dashboard state...';
   try {
+    const memoTo = prompt(
+  'Enter Memo To / Office Recipient:',
+  'Provincial Link Operations Office / Technical Evaluation Unit'
+);
+
+if (memoTo === null) {
+  btn.disabled = false;
+  btn.textContent = orig;
+  return;
+}
     await new Promise(r=>setTimeout(r,500)); // let chart settle before toDataURL
     const meta         = pdf_getContextMeta();
     const ds           = pdf_getFilteredDataset();
     const stats        = pdf_computeStats(ds);
     const chartDataUrl = pdf_captureChart();
     btn.textContent='⌛ Assembling 5-section report...';
-    const docHtml=pdf_assembleDocument(meta,stats,ds,chartDataUrl);
+    const docHtml = pdf_assembleDocument(
+  meta,
+  stats,
+  ds,
+  chartDataUrl,
+  memoTo
+);
     btn.textContent='⌛ Rendering PDF...';
     await html2pdf().set({
       margin:[12,10,14,10], filename:`${meta.filename}.pdf`,
