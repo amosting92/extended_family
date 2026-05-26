@@ -868,7 +868,6 @@ function pdf_groupByField(ds, field) {
 
 // UTIL: Build context meta from selectors
 function pdf_getContextMeta() {
-  function pdf_getContextMeta() {
 
   const cluster =
     document.getElementById('clusterSelector').value;
@@ -936,6 +935,7 @@ function pdf_getContextMeta() {
     filename:
       `${filename}_${new Date().toISOString().slice(0,10)}`
   };
+
 }
 
 // UTIL: Capture chart canvas
