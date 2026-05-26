@@ -797,11 +797,42 @@ if(invalid > 0)
 
 // UTIL: Get filtered dataset matching current selector state
 function pdf_getFilteredDataset() {
-  const muni   = document.getElementById('muniSelector').value;
-  const worker = document.getElementById('caseworkerSelector').value;
+
+  const cluster =
+    document.getElementById('clusterSelector').value;
+
+  const muni =
+    document.getElementById('muniSelector').value;
+
+  const worker =
+    document.getElementById('caseworkerSelector').value;
+
   let ds = centralRecordsCache;
-  if (muni)   ds = ds.filter(r => r.MUNICIPALITY === muni);
-  if (worker) ds = ds.filter(r => r.ML_ASSIGNED  === worker);
+
+  if (cluster) {
+
+    ds = ds.filter(
+      r => r.CLUSTER === cluster
+    );
+
+  }
+
+  if (muni) {
+
+    ds = ds.filter(
+      r => r.MUNICIPALITY === muni
+    );
+
+  }
+
+  if (worker) {
+
+    ds = ds.filter(
+      r => r.ML_ASSIGNED === worker
+    );
+
+  }
+
   return ds;
 }
 
@@ -837,14 +868,74 @@ function pdf_groupByField(ds, field) {
 
 // UTIL: Build context meta from selectors
 function pdf_getContextMeta() {
-  const muni   = document.getElementById('muniSelector').value;
-  const worker = document.getElementById('caseworkerSelector').value;
-  let contextLabel='PROVINCIAL CONSOLIDATED BASELINE (ALL PALAWAN LOCATIONS)', scopeType='Provincial', filename='Provincial_EFV_Report';
-  if (muni) {
-    if (worker) { contextLabel=`INDIVIDUAL AUDIT — CASEWORKER: ${worker.toUpperCase()} (${muni.toUpperCase()} CLUSTER)`; scopeType='Caseworker Audit'; filename=`Caseworker_${worker.replace(/[^a-zA-Z0-9]/g,'_')}_EFV_Report`; }
-    else        { contextLabel=`MUNICIPAL CLUSTER TRACK — AREA: ${muni.toUpperCase()}`; scopeType='Municipal'; filename=`Municipality_${muni.replace(/[^a-zA-Z0-9]/g,'_')}_EFV_Report`; }
+  function pdf_getContextMeta() {
+
+  const cluster =
+    document.getElementById('clusterSelector').value;
+
+  const muni =
+    document.getElementById('muniSelector').value;
+
+  const worker =
+    document.getElementById('caseworkerSelector').value;
+
+  let contextLabel =
+    'PROVINCIAL CONSOLIDATED BASELINE (ALL PALAWAN LOCATIONS)';
+
+  let scopeType =
+    'Provincial';
+
+  let filename =
+    'Provincial_EFV_Report';
+
+  if (cluster) {
+
+    contextLabel =
+      `${cluster.toUpperCase()} OPERATIONAL CLUSTER`;
+
+    scopeType =
+      'Cluster';
+
+    filename =
+      `${cluster.replace(/[^a-zA-Z0-9]/g,'_')}_EFV_Report`;
+
   }
-  return { muni, worker, contextLabel, scopeType, filename: `${filename}_${new Date().toISOString().slice(0,10)}` };
+
+  if (muni) {
+
+    contextLabel =
+      `MUNICIPAL CLUSTER TRACK — AREA: ${muni.toUpperCase()}`;
+
+    scopeType =
+      'Municipal';
+
+    filename =
+      `Municipality_${muni.replace(/[^a-zA-Z0-9]/g,'_')}_EFV_Report`;
+
+  }
+
+  if (worker) {
+
+    contextLabel =
+      `INDIVIDUAL AUDIT — CASEWORKER: ${worker.toUpperCase()} (${muni.toUpperCase()} CLUSTER)`;
+
+    scopeType =
+      'Caseworker Audit';
+
+    filename =
+      `Caseworker_${worker.replace(/[^a-zA-Z0-9]/g,'_')}_EFV_Report`;
+
+  }
+
+  return {
+    cluster,
+    muni,
+    worker,
+    contextLabel,
+    scopeType,
+    filename:
+      `${filename}_${new Date().toISOString().slice(0,10)}`
+  };
 }
 
 // UTIL: Capture chart canvas
