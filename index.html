@@ -258,12 +258,29 @@ function executeAggregationPipeline() {
   const total = ds.length;
   let complete = 0, incomplete = 0, invalid = 0, pending = 0;
   ds.forEach(r => {
-    const s = String(r.FINAL_STATUS || '').toUpperCase();
-    if      (s === 'COMPLETE')   complete++;
-    else if (s === 'INCOMPLETE') incomplete++;
-    else if (s === 'INVALID')    invalid++;
-    else                         pending++;
-  });
+
+  const raw = r.FINAL_STATUS;
+  const s = String(raw || '')
+    .trim()
+    .toUpperCase();
+
+  console.log('RAW STATUS:', raw);
+  console.log('PARSED STATUS:', s);
+
+  if (s === 'COMPLETE') {
+    complete++;
+  }
+  else if (s === 'INCOMPLETE') {
+    incomplete++;
+  }
+  else if (s === 'INVALID') {
+    invalid++;
+  }
+  else {
+    pending++;
+  }
+
+});
 
   document.getElementById('kpiTotal').textContent      = total.toLocaleString();
   document.getElementById('kpiComplete').textContent   = complete.toLocaleString();
