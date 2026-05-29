@@ -20,6 +20,8 @@
   --orange:#c2410c;--orange-50:#fff7ed;
   --red:#b91c1c;--red-50:#fee2e2;
   --slate:#475569;--slate-50:#f1f5f9;
+  --blue:#1d4ed8;--blue-50:#eff6ff;
+  --violet:#7c3aed;--violet-50:#f5f3ff;
   --radius:18px;--radius-sm:12px;
   --shadow-sm:0 10px 20px rgba(15,23,42,.06);
   --shadow:0 22px 60px rgba(15,23,42,.09);
@@ -61,12 +63,14 @@ a{color:inherit;text-decoration:none}
 .btn-success{background:var(--green);color:#fff;border:none}
 .btn-success:hover{filter:brightness(0.92)}
 .btn:disabled{opacity:0.7;cursor:not-allowed}
-.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:14px;margin-bottom:24px}
 .kpi-card{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;justify-content:space-between;min-height:102px}
 .kpi-green{border-left-color:var(--green)}
 .kpi-orange{border-left-color:var(--orange)}
 .kpi-red{border-left-color:var(--red)}
 .kpi-slate{border-left-color:var(--slate)}
+.kpi-blue{border-left-color:var(--blue)}
+.kpi-violet{border-left-color:var(--violet)}
 .kpi-value{font-size:28px;font-weight:800;margin:2px 0;letter-spacing:-0.03em;line-height:1.2}
 .kpi-pct-subtext{font-size:11px;font-weight:600;margin-top:2px}
 .grid-2{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;margin-bottom:24px}
@@ -94,7 +98,7 @@ a{color:inherit;text-decoration:none}
 .target-tag{display:inline-block;background:rgba(15,23,42,.06);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:11px;font-weight:700;margin:2px 4px 2px 0}
 .insight-danger .target-tag{background:rgba(185,28,28,.08);color:var(--red)}
 .insight-warning .target-tag{background:rgba(194,65,12,.08);color:var(--orange)}
-@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:1024px){.grid-2{grid-template-columns:1fr}}
 @media(max-width:820px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto;flex-direction:row;padding:12px 16px}.sidebar-foot{display:none}.nav{flex-direction:row}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.kpi-grid{grid-template-columns:1fr}.filter-row-fields{min-width:100%}}
@@ -180,6 +184,16 @@ a{color:inherit;text-decoration:none}
         <div class="small muted font-weight-bold">PENDING</div>
         <div class="kpi-value" id="kpiPending">--</div>
         <div class="kpi-pct-subtext" style="color:var(--red)" id="pctPending">--% share</div>
+      </div>
+      <div class="kpi-card kpi-blue">
+        <div class="small muted font-weight-bold">NOT YET VALIDATED</div>
+        <div class="kpi-value" id="kpiNotYetValidated">--</div>
+        <div class="kpi-pct-subtext" style="color:var(--blue)" id="pctNotYetValidated">--% share</div>
+      </div>
+      <div class="kpi-card kpi-violet">
+        <div class="small muted font-weight-bold">NOT YET ENCODED</div>
+        <div class="kpi-value" id="kpiNotYetEncoded">--</div>
+        <div class="kpi-pct-subtext" style="color:var(--violet)" id="pctNotYetEncoded">--% share</div>
       </div>
     </div>
 
@@ -463,6 +477,8 @@ function executeAggregationPipeline() {
   let incomplete = 0;
   let invalid = 0;
   let pending = 0;
+  let not_yet_validated = 0;
+  let not_yet_encoded = 0;
 
   ds.forEach(r => {
 
@@ -473,27 +489,22 @@ function executeAggregationPipeline() {
       .toUpperCase();
 
     if (s === 'COMPLETE') {
-
       complete++;
-
     }
-
     else if (s === 'INCOMPLETE') {
-
       incomplete++;
-
     }
-
     else if (s === 'INVALID') {
-
       invalid++;
-
     }
-
+    else if (s === 'NOT_YET_VALIDATED') {
+      not_yet_validated++;
+    }
+    else if (s === 'NOT_YET_ENCODED') {
+      not_yet_encoded++;
+    }
     else {
-
       pending++;
-
     }
 
   });
@@ -513,6 +524,12 @@ function executeAggregationPipeline() {
   document.getElementById('kpiPending').textContent =
     pending.toLocaleString();
 
+  document.getElementById('kpiNotYetValidated').textContent =
+    not_yet_validated.toLocaleString();
+
+  document.getElementById('kpiNotYetEncoded').textContent =
+    not_yet_encoded.toLocaleString();
+
   document.getElementById('pctComplete').textContent =
     `${total === 0 ? 0 : ((complete / total) * 100).toFixed(1)}% of scope`;
 
@@ -524,6 +541,12 @@ function executeAggregationPipeline() {
 
   document.getElementById('pctPending').textContent =
     `${total === 0 ? 0 : ((pending / total) * 100).toFixed(1)}% of scope`;
+
+  document.getElementById('pctNotYetValidated').textContent =
+    `${total === 0 ? 0 : ((not_yet_validated / total) * 100).toFixed(1)}% of scope`;
+
+  document.getElementById('pctNotYetEncoded').textContent =
+    `${total === 0 ? 0 : ((not_yet_encoded / total) * 100).toFixed(1)}% of scope`;
 
   document.getElementById('subTotal').textContent =
 
@@ -537,7 +560,9 @@ function executeAggregationPipeline() {
     complete,
     incomplete,
     invalid,
-    pending
+    pending,
+    not_yet_validated,
+    not_yet_encoded
   );
 
   renderRankingsPanel(
@@ -554,20 +579,22 @@ function executeAggregationPipeline() {
     incomplete,
     invalid,
     pending,
+    not_yet_validated,
+    not_yet_encoded,
     total
   );
 
 }
 
-function renderDoughnutChart(c, inc, inv, p) {
+function renderDoughnutChart(c, inc, inv, p, nyv, nye) {
   const ctx = document.getElementById('statusChart').getContext('2d');
   if (activeChartInstance) activeChartInstance.destroy();
-  const totalSum = c + inc + inv + p;
+  const totalSum = c + inc + inv + p + nyv + nye;
   activeChartInstance = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['COMPLETE','INCOMPLETE','INVALID','PENDING'],
-      datasets: [{ data:[c,inc,inv,p], backgroundColor:['#16a34a','#ea580c','#475569','#dc2626'], borderColor:'#fff', borderWidth:2 }]
+      labels: ['COMPLETE','INCOMPLETE','INVALID','PENDING','NOT YET VALIDATED','NOT YET ENCODED'],
+      datasets: [{ data:[c,inc,inv,p,nyv,nye], backgroundColor:['#16a34a','#ea580c','#475569','#dc2626','#1d4ed8','#7c3aed'], borderColor:'#fff', borderWidth:2 }]
     },
     options: {
       responsive:true, maintainAspectRatio:false, cutout:'55%',
@@ -620,7 +647,7 @@ function renderRankingsPanel(dataset, muni, worker) {
   }
 }
 
-function generateDynamicAlerts(dataset, muni, worker, complete, incomplete, invalid, pending, total) {
+function generateDynamicAlerts(dataset, muni, worker, complete, incomplete, invalid, pending, not_yet_validated, not_yet_encoded, total) {
   const panel = document.getElementById('analysisPanel');
   let html    = '';
   const rate  = total===0?0:((complete/total)*100).toFixed(1);
@@ -677,7 +704,7 @@ else
       </div>
     </div>
   `;
-  const pendingMap={}, incompleteMap={}, invalidMap={}, brgyMap={};
+  const pendingMap={}, incompleteMap={}, invalidMap={}, nyvMap={}, nyeMap={}, brgyMap={};
   dataset.forEach(r => {
 
   const s = String(r.FINAL_STATUS || '')
@@ -707,6 +734,20 @@ else
 
     if (!invalidMap[m]) invalidMap[m] = {};
     invalidMap[m][ml] = (invalidMap[m][ml] || 0) + 1;
+
+  }
+
+  else if (s === 'NOT_YET_VALIDATED') {
+
+    if (!nyvMap[m]) nyvMap[m] = {};
+    nyvMap[m][ml] = (nyvMap[m][ml] || 0) + 1;
+
+  }
+
+  else if (s === 'NOT_YET_ENCODED') {
+
+    if (!nyeMap[m]) nyeMap[m] = {};
+    nyeMap[m][ml] = (nyeMap[m][ml] || 0) + 1;
 
   }
 
@@ -779,6 +820,24 @@ if(invalid > 0)
     'insight-danger'
   );
 
+  if(not_yet_validated > 0)
+  html += buildNestedAlert(
+    nyvMap,
+    '📋',
+    `Not Yet Validated — No Field Progress (${not_yet_validated.toLocaleString()} Total)`,
+    'These records have no validation entry, no RELIC encoding, and no reason recorded. Zero movement from field:',
+    'insight-danger'
+  );
+
+  if(not_yet_encoded > 0)
+  html += buildNestedAlert(
+    nyeMap,
+    '💾',
+    `Not Yet Encoded — Validated But Missing in RELIC (${not_yet_encoded.toLocaleString()} Total)`,
+    'These records were physically validated and a reason was recorded, but have not yet been encoded into RELIC. Encoding must be completed:',
+    'insight-warning'
+  );
+
   if (!worker) {
     const slow=Object.entries(brgyMap).map(([name,d])=>({name,total:d.total,done:d.complete,rate:d.total===0?0:Math.round((d.complete/d.total)*100)})).filter(b=>b.rate<45&&b.total>=2).sort((a,b)=>a.rate-b.rate).slice(0,5);
     if(slow.length>0){
@@ -839,15 +898,17 @@ function pdf_getFilteredDataset() {
 // UTIL: Compute status counts + completion rate
 function pdf_computeStats(ds) {
   const total = ds.length;
-  let complete=0, incomplete=0, invalid=0, pending=0;
+  let complete=0, incomplete=0, invalid=0, pending=0, not_yet_validated=0, not_yet_encoded=0;
   ds.forEach(r => {
     const s = String(r.FINAL_STATUS||'').toUpperCase();
-    if      (s==='COMPLETE')   complete++;
-    else if (s==='INCOMPLETE') incomplete++;
-    else if (s==='INVALID')    invalid++;
-    else                       pending++;
+    if      (s==='COMPLETE')          complete++;
+    else if (s==='INCOMPLETE')        incomplete++;
+    else if (s==='INVALID')           invalid++;
+    else if (s==='NOT_YET_VALIDATED') not_yet_validated++;
+    else if (s==='NOT_YET_ENCODED')   not_yet_encoded++;
+    else                              pending++;
   });
-  return { total, complete, incomplete, invalid, pending, rate: total===0?0:(complete/total)*100 };
+  return { total, complete, incomplete, invalid, pending, not_yet_validated, not_yet_encoded, rate: total===0?0:(complete/total)*100 };
 }
 
 // UTIL: Group by field and return array with stats per group
@@ -855,12 +916,14 @@ function pdf_groupByField(ds, field) {
   const g = {};
   ds.forEach(r => {
     const k = (r[field]||'UNKNOWN').trim();
-    if(!g[k]) g[k]={total:0,complete:0,incomplete:0,invalid:0,pending:0};
+    if(!g[k]) g[k]={total:0,complete:0,incomplete:0,invalid:0,pending:0,not_yet_validated:0,not_yet_encoded:0};
     g[k].total++;
     const s=String(r.FINAL_STATUS||'').toUpperCase();
     if(s==='COMPLETE') g[k].complete++;
     else if(s==='INCOMPLETE') g[k].incomplete++;
     else if(s==='INVALID') g[k].invalid++;
+    else if(s==='NOT_YET_VALIDATED') g[k].not_yet_validated++;
+    else if(s==='NOT_YET_ENCODED') g[k].not_yet_encoded++;
     else g[k].pending++;
   });
   return Object.entries(g).map(([name,d])=>({name,...d,rate:d.total===0?0:Math.round((d.complete/d.total)*100)}));
@@ -979,7 +1042,7 @@ function pdf_secHead(n, label) {
 
 // SECTION 1: Executive Summary
 function pdf_buildExecutiveSummary(meta, stats, chartDataUrl) {
-  const {total,complete,incomplete,invalid,pending,rate} = stats;
+  const {total,complete,incomplete,invalid,pending,not_yet_validated,not_yet_encoded,rate} = stats;
   const rStr = rate.toFixed(1);
   const pct  = (n) => total===0?'0.0':((n/total)*100).toFixed(1);
   const ts   = new Date().toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
@@ -1026,6 +1089,8 @@ if (meta.muni && meta.worker) {
         <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#fffbf5;color:#c2410c;font-weight:600;">Incomplete Status (RELIC Discrepancy&mdash;Sync Lag):</td><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#fffbf5;color:#c2410c;font-weight:700;text-align:right;">${incomplete.toLocaleString()} Records (<strong>${pct(incomplete)}%</strong> of total)</td></tr>
         <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;color:#475569;font-weight:600;">Invalid Status (Data Discrepancy/Conflict):</td><td style="padding:5px 10px;border:1px solid #e2e8f0;color:#475569;font-weight:700;text-align:right;">${invalid.toLocaleString()} Records (<strong>${pct(invalid)}%</strong> of total)</td></tr>
         <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#fff5f5;color:#b91c1c;font-weight:600;">Pending Status (Zero Field Progress):</td><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#fff5f5;color:#b91c1c;font-weight:700;text-align:right;">${pending.toLocaleString()} Records (<strong>${pct(pending)}%</strong> of total)</td></tr>
+        <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#eff6ff;color:#1d4ed8;font-weight:600;">Not Yet Validated (No Entry, No Progress):</td><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#eff6ff;color:#1d4ed8;font-weight:700;text-align:right;">${not_yet_validated.toLocaleString()} Records (<strong>${pct(not_yet_validated)}%</strong> of total)</td></tr>
+        <tr><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#f5f3ff;color:#7c3aed;font-weight:600;">Not Yet Encoded (Validated, Pending RELIC Entry):</td><td style="padding:5px 10px;border:1px solid #e2e8f0;background:#f5f3ff;color:#7c3aed;font-weight:700;text-align:right;">${not_yet_encoded.toLocaleString()} Records (<strong>${pct(not_yet_encoded)}%</strong> of total)</td></tr>
       </table>
       ${note}
       <div style="clear:both;"></div>
@@ -1099,28 +1164,48 @@ function pdf_buildMLLeaderboard(meta, ds) {
 
 // SECTION 4: Critical Operational Alerts & Hit List
 function pdf_buildAlertHitList(meta, ds, stats) {
-  const {pending, incomplete} = stats;
+  const {pending, incomplete, not_yet_validated, not_yet_encoded} = stats;
   let html = pdf_secHead(4,'Critical Operational Alerts &amp; Hit List') +
     `<p style="font-size:10px;color:#475569;margin:0 0 10px;font-style:italic;">(Action items targeted at specific data blocks that are stalling the system)</p>`;
 
-  // A. Pending
+  // A. Not Yet Validated
+  if (not_yet_validated > 0) {
+    const byML={};
+    ds.filter(r=>String(r.FINAL_STATUS||'').toUpperCase()==='NOT_YET_VALIDATED')
+      .forEach(r=>{ const ml=(r.ML_ASSIGNED||'UNASSIGNED').trim(); byML[ml]=(byML[ml]||0)+1; });
+    const rows=Object.entries(byML).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([ml,c])=>
+      `<tr><td style="padding:5px 8px;border:1px solid #bfdbfe;font-size:10px;">👤 ML Officer: <strong>${ml}</strong></td><td style="padding:5px 8px;border:1px solid #bfdbfe;font-size:10px;text-align:right;font-weight:700;color:#1d4ed8;">&mdash; ${c.toLocaleString()} records with no field entry</td></tr>`).join('');
+    html+=`<div style="margin-bottom:12px;"><div style="font-weight:700;font-size:11px;background:#eff6ff;border:1px solid #bfdbfe;border-bottom:none;padding:6px 10px;border-radius:4px 4px 0 0;color:#1d4ed8;">A. Not Yet Validated — Zero Progress Records</div><div style="border:1px solid #bfdbfe;border-top:none;padding:8px 10px;font-size:10px;line-height:1.6;background:#fff;">There are <strong>${not_yet_validated.toLocaleString()} records</strong> with no validation, no RELIC encoding, and no reason on file (<em>All three flags = NO</em>). These are completely untouched.<br><br><strong>Action Required:</strong> Immediate field follow-up with the Municipal Links holding these brackets:</div><table style="width:100%;border-collapse:collapse;"><tbody>${rows}</tbody></table></div>`;
+  }
+
+  // B. Pending
   if (pending > 0) {
     const byML={};
-    ds.filter(r=>!['COMPLETE','INCOMPLETE','INVALID'].includes(String(r.FINAL_STATUS||'').toUpperCase()))
+    ds.filter(r=>String(r.FINAL_STATUS||'').toUpperCase()==='PENDING')
       .forEach(r=>{ const ml=(r.ML_ASSIGNED||'UNASSIGNED').trim(); byML[ml]=(byML[ml]||0)+1; });
     const rows=Object.entries(byML).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([ml,c])=>
       `<tr><td style="padding:5px 8px;border:1px solid #fecaca;font-size:10px;">👤 ML Officer: <strong>${ml}</strong></td><td style="padding:5px 8px;border:1px solid #fecaca;font-size:10px;text-align:right;font-weight:700;color:#b91c1c;">&mdash; ${c.toLocaleString()} Pending cases untouched</td></tr>`).join('');
-    html+=`<div style="margin-bottom:12px;"><div style="font-weight:700;font-size:11px;background:#fef2f2;border:1px solid #fecaca;border-bottom:none;padding:6px 10px;border-radius:4px 4px 0 0;color:#b91c1c;">A. The Validation Stall (Pending Cases)</div><div style="border:1px solid #fecaca;border-top:none;padding:8px 10px;font-size:10px;line-height:1.6;background:#fff;">There are <strong>${pending.toLocaleString()} records</strong> that have zero progress entry or field notes from the field (<em>Validated = No</em>). These cases are currently sitting stagnant.<br><br><strong>Action Required:</strong> Immediate data call-up and desk audit for the following Municipal Links who hold these unvalidated brackets:</div><table style="width:100%;border-collapse:collapse;"><tbody>${rows}</tbody></table></div>`;
+    html+=`<div style="margin-bottom:12px;"><div style="font-weight:700;font-size:11px;background:#fef2f2;border:1px solid #fecaca;border-bottom:none;padding:6px 10px;border-radius:4px 4px 0 0;color:#b91c1c;">B. The Validation Stall (Pending / Unresolved Cases)</div><div style="border:1px solid #fecaca;border-top:none;padding:8px 10px;font-size:10px;line-height:1.6;background:#fff;">There are <strong>${pending.toLocaleString()} records</strong> that have an unrecognized or unresolved status entry. These cases require data correction and re-submission.<br><br><strong>Action Required:</strong> Desk audit and data cleanup for the following Municipal Links:</div><table style="width:100%;border-collapse:collapse;"><tbody>${rows}</tbody></table></div>`;
   }
 
-  // B. RELIC Backlog
+  // C. RELIC Backlog (Incomplete)
   if (incomplete > 0) {
     const byML={};
     ds.filter(r=>String(r.FINAL_STATUS||'').toUpperCase()==='INCOMPLETE')
       .forEach(r=>{ const ml=(r.ML_ASSIGNED||'UNASSIGNED').trim(); byML[ml]=(byML[ml]||0)+1; });
     const rows=Object.entries(byML).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([ml,c])=>
       `<tr><td style="padding:5px 8px;border:1px solid #fed7aa;font-size:10px;">👤 ML Officer: <strong>${ml}</strong></td><td style="padding:5px 8px;border:1px solid #fed7aa;font-size:10px;text-align:right;font-weight:700;color:#c2410c;">&mdash; ${c.toLocaleString()} Validation forms pending encoding</td></tr>`).join('');
-    html+=`<div style="margin-bottom:12px;"><div style="font-weight:700;font-size:11px;background:#fff7ed;border:1px solid #fed7aa;border-bottom:none;padding:6px 10px;border-radius:4px 4px 0 0;color:#c2410c;">B. The RELIC Synchronization Backlog (Incomplete Pipeline)</div><div style="border:1px solid #fed7aa;border-top:none;padding:8px 10px;font-size:10px;line-height:1.6;background:#fff;">A major block in our pipeline consists of <strong>${incomplete.toLocaleString()} records</strong> that are fully validated on paper forms (<em>Validated = YES</em>) but have not been encoded into the system infrastructure (<em>Updated in RELIC = NO</em>).<br><br><strong>Action Required:</strong> Direct technical enforcement to clear encoding bottlenecks. The following officers must sync their field binders with the central RELIC workstation immediately:</div><table style="width:100%;border-collapse:collapse;"><tbody>${rows}</tbody></table></div>`;
+    html+=`<div style="margin-bottom:12px;"><div style="font-weight:700;font-size:11px;background:#fff7ed;border:1px solid #fed7aa;border-bottom:none;padding:6px 10px;border-radius:4px 4px 0 0;color:#c2410c;">C. The RELIC Synchronization Backlog (Incomplete Pipeline)</div><div style="border:1px solid #fed7aa;border-top:none;padding:8px 10px;font-size:10px;line-height:1.6;background:#fff;">A major block in our pipeline consists of <strong>${incomplete.toLocaleString()} records</strong> that are fully validated on paper forms (<em>Validated = YES</em>) but have not been encoded into the system infrastructure (<em>Updated in RELIC = NO</em>).<br><br><strong>Action Required:</strong> Direct technical enforcement to clear encoding bottlenecks. The following officers must sync their field binders with the central RELIC workstation immediately:</div><table style="width:100%;border-collapse:collapse;"><tbody>${rows}</tbody></table></div>`;
+  }
+
+  // D. Not Yet Encoded
+  if (not_yet_encoded > 0) {
+    const byML={};
+    ds.filter(r=>String(r.FINAL_STATUS||'').toUpperCase()==='NOT_YET_ENCODED')
+      .forEach(r=>{ const ml=(r.ML_ASSIGNED||'UNASSIGNED').trim(); byML[ml]=(byML[ml]||0)+1; });
+    const rows=Object.entries(byML).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([ml,c])=>
+      `<tr><td style="padding:5px 8px;border:1px solid #ddd6fe;font-size:10px;">👤 ML Officer: <strong>${ml}</strong></td><td style="padding:5px 8px;border:1px solid #ddd6fe;font-size:10px;text-align:right;font-weight:700;color:#7c3aed;">&mdash; ${c.toLocaleString()} records validated, not yet in RELIC</td></tr>`).join('');
+    html+=`<div style="margin-bottom:12px;"><div style="font-weight:700;font-size:11px;background:#f5f3ff;border:1px solid #ddd6fe;border-bottom:none;padding:6px 10px;border-radius:4px 4px 0 0;color:#7c3aed;">D. Not Yet Encoded — Validated But Not in RELIC</div><div style="border:1px solid #ddd6fe;border-top:none;padding:8px 10px;font-size:10px;line-height:1.6;background:#fff;">These <strong>${not_yet_encoded.toLocaleString()} records</strong> have been physically validated in the field with a reason on file (<em>Validated = YES, Reason = YES</em>), but remain absent from the RELIC system (<em>Updated in RELIC = NO</em>).<br><br><strong>Action Required:</strong> Priority encoding run required from the following officers:</div><table style="width:100%;border-collapse:collapse;"><tbody>${rows}</tbody></table></div>`;
   }
 
   // C. Geographic Bottlenecks
@@ -1144,7 +1229,7 @@ function pdf_buildAlertHitList(meta, ds, stats) {
 
 // SECTION 5: Strategic Recommendations
 function pdf_buildRecommendations(meta, stats, ds) {
-  const {total,pending,incomplete,invalid,rate} = stats;
+  const {total,pending,incomplete,invalid,not_yet_validated,not_yet_encoded,rate} = stats;
   const pct = (n) => total===0?0:(n/total)*100;
 
   const bm={};
@@ -1152,11 +1237,13 @@ function pdf_buildRecommendations(meta, stats, ds) {
   const hasLowBrgys = Object.values(bm).some(b=>b.total>=2&&(b.complete/b.total)<0.45);
 
   const mlP={};
-  ds.filter(r=>!['COMPLETE','INCOMPLETE','INVALID'].includes(String(r.FINAL_STATUS||'').toUpperCase())).forEach(r=>{ const ml=r.ML_ASSIGNED||'UNASSIGNED'; mlP[ml]=(mlP[ml]||0)+1; });
+  ds.filter(r=>['PENDING','NOT_YET_VALIDATED'].includes(String(r.FINAL_STATUS||'').toUpperCase())).forEach(r=>{ const ml=r.ML_ASSIGNED||'UNASSIGNED'; mlP[ml]=(mlP[ml]||0)+1; });
   const hasHighPendingML = Object.values(mlP).some(c=>c>=30);
 
   const recs=[];
+  if(pct(not_yet_validated)>=5) recs.push({t:'Immediate Field Coverage Audit', b:`There are ${not_yet_validated.toLocaleString()} records with absolutely zero field movement (Not Yet Validated). Conduct an emergency coverage audit across the affected Municipal Links to identify access barriers, unreachable households, or data submission failures before the validation window closes.`});
   if(pct(pending)>=10)    recs.push({t:'Deploy Mobile Data Clean-up Units', b:`Conduct targeted technical visits to ${hasHighPendingML?'the highest-pending Municipal Link officers':'affected cluster areas'} to provide on-site assistance in clearing unvalidated records and improving field submission velocity prior to the phase deadline.`});
+  if(pct(not_yet_encoded)>=5) recs.push({t:'Priority RELIC Encoding Run', b:`${not_yet_encoded.toLocaleString()} records are physically validated with reason on file but remain absent from RELIC (Not Yet Encoded). Coordinate an immediate encoding session to flush this specific bracket and prevent double-handling in the next audit cycle.`});
   if(pct(incomplete)>=8)  recs.push({t:'Accelerate RELIC Encoding Windows', b:`Enforce a strict 48-hour encoding compliance window for all Municipal Links carrying Incomplete Status records. Officers must synchronize their physical field binders with the central RELIC workstation to eliminate the existing data entry backlog without further delay.`});
   if(hasLowBrgys)         recs.push({t:'Conduct Geographic Integrity Sweeps', b:`Mandate an immediate re-verification pass across all identified low-completion barangay sectors. Field teams must resolve outstanding eligibility discrepancies and exception-flagged entries before the close of the current audit period to prevent cross-batch expiration conflicts.`});
   if(pct(invalid)>=3)     recs.push({t:'Data Integrity Cross-Matching Review', b:`Initiate a formal cross-matching review of the ${invalid.toLocaleString()} INVALID-flagged entries in coordination with the PPIS and BDM Tracker systems. Priority must be given to resolving duplicate household IDs, name mismatches, and missing demographic fields ahead of the next validation cycle.`});
