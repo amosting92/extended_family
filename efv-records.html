@@ -64,7 +64,6 @@ body{font-family:'Manrope',system-ui,sans-serif;font-size:14px;line-height:1.5;c
 
 .status-pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
 .status-complete{background:var(--green-50);color:var(--green)}
-.status-incomplete{background:var(--orange-50);color:var(--orange)}
 .status-pending{background:var(--red-50);color:var(--red)}
 .status-invalid{background:var(--slate-50);color:var(--slate)}
 .status-not-yet-validated{background:var(--blue-50);color:var(--blue)}
@@ -118,7 +117,6 @@ body{font-family:'Manrope',system-ui,sans-serif;font-size:14px;line-height:1.5;c
           <select id="statusFilter">
             <option value="">All Statuses</option>
             <option value="COMPLETE">Complete</option>
-            <option value="INCOMPLETE">Incomplete</option>
             <option value="INVALID">Invalid</option>
             <option value="PENDING">Pending</option>
             <option value="NOT_YET_VALIDATED">Not Yet Validated</option>
@@ -166,7 +164,6 @@ function debounce(fn, ms = 350) {
 function statusClass(s) {
   const k = String(s || '').toUpperCase();
   if (k === 'COMPLETE')           return 'status-complete';
-  if (k === 'INCOMPLETE')         return 'status-incomplete';
   if (k === 'INVALID')            return 'status-invalid';
   if (k === 'NOT_YET_VALIDATED')  return 'status-not-yet-validated';
   if (k === 'NOT_YET_ENCODED')    return 'status-not-yet-encoded';
