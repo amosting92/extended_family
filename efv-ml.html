@@ -123,7 +123,6 @@ a{color:inherit;text-decoration:none}
           <select id="statusFilter">
             <option value="">All Statuses</option>
             <option value="COMPLETE">Complete</option>
-            <option value="INCOMPLETE">Incomplete</option>
             <option value="INVALID">Invalid</option>
             <option value="PENDING">Pending</option>
             <option value="NOT_YET_VALIDATED">Not Yet Validated</option>
@@ -137,8 +136,7 @@ a{color:inherit;text-decoration:none}
           <thead><tr>
             <th>Rank / ML Assigned</th>
             <th class="num">Caseload Targets</th>
-            <th class="num">Complete Output</th>
-            <th class="num">Incomplete</th>
+            <th class="num">Complete</th>
             <th class="num">Not Yet Validated</th>
             <th class="num">Not Yet Encoded</th>
             <th class="num">Pending / Other</th>
@@ -201,12 +199,11 @@ function applyFiltersAndAggregate() {
   filteredRecords.forEach(r => {
     const mlName = r.ML_ASSIGNED || 'UNASSIGNED';
     if (!mlGroups[mlName]) {
-      mlGroups[mlName] = { ml_assigned: mlName, total: 0, complete: 0, incomplete: 0, invalid: 0, pending: 0, not_yet_validated: 0, not_yet_encoded: 0, pct: 0 };
+      mlGroups[mlName] = { ml_assigned: mlName, total: 0, complete: 0, invalid: 0, pending: 0, not_yet_validated: 0, not_yet_encoded: 0, pct: 0 };
     }
     mlGroups[mlName].total++;
     const s = String(r.FINAL_STATUS || '').toUpperCase();
     if      (s === 'COMPLETE')           mlGroups[mlName].complete++;
-    else if (s === 'INCOMPLETE')         mlGroups[mlName].incomplete++;
     else if (s === 'INVALID')            mlGroups[mlName].invalid++;
     else if (s === 'NOT_YET_VALIDATED')  mlGroups[mlName].not_yet_validated++;
     else if (s === 'NOT_YET_ENCODED')    mlGroups[mlName].not_yet_encoded++;
@@ -233,16 +230,12 @@ function renderTable() {
   const tbody = document.getElementById('mlPerformanceTbody');
   
   if (!groupedPerformanceData.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="padding:20px;text-align:center;">No matching performance indicators found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;">No matching performance indicators found.</td></tr>';
     return;
   }
 
   tbody.innerHTML = groupedPerformanceData.map((r, i) => {
-    const total = r.total;
-    const complete = r.complete;
     const pct = r.pct;
-
-    // Premium styling for top ranks
     let rankLabel = `#${i + 1}`;
     if (i === 0 && pct > 0) rankLabel = `🥇 #${i + 1}`;
     else if (i === 1 && pct > 0) rankLabel = `🥈 #${i + 1}`;
@@ -251,9 +244,8 @@ function renderTable() {
     return `
       <tr>
         <td><span style="font-variant-numeric:tabular-nums;font-weight:800;color:var(--muted);margin-right:8px;">${rankLabel}</span><strong>${r.ml_assigned}</strong></td>
-        <td class="num">${total.toLocaleString()}</td>
-        <td class="num" style="color:var(--green);font-weight:700;">${complete.toLocaleString()}</td>
-        <td class="num" style="color:var(--orange);">${r.incomplete.toLocaleString()}</td>
+        <td class="num">${r.total.toLocaleString()}</td>
+        <td class="num" style="color:var(--green);font-weight:700;">${r.complete.toLocaleString()}</td>
         <td class="num" style="color:#1d4ed8;">${r.not_yet_validated.toLocaleString()}</td>
         <td class="num" style="color:#7c3aed;">${r.not_yet_encoded.toLocaleString()}</td>
         <td class="num" style="color:var(--red);">${r.pending.toLocaleString()}</td>
@@ -271,10 +263,10 @@ function renderTable() {
 function exportToCsv() {
   if (!groupedPerformanceData.length) return;
   
-  let csvContent = "data:text/csv;charset=utf-8,Rank,ML Assigned,Caseload Targets,Complete,Incomplete,Not Yet Validated,Not Yet Encoded,Pending/Other,Progress Output Ratio\n";
+  let csvContent = "data:text/csv;charset=utf-8,Rank,ML Assigned,Caseload Targets,Complete,Not Yet Validated,Not Yet Encoded,Pending/Other,Progress Output Ratio\n";
   
   groupedPerformanceData.forEach((r, i) => {
-    csvContent += `"${i + 1}","${r.ml_assigned}",${r.total},${r.complete},${r.incomplete},${r.not_yet_validated},${r.not_yet_encoded},${r.pending},${r.pct}%\n`;
+    csvContent += `"${i + 1}","${r.ml_assigned}",${r.total},${r.complete},${r.not_yet_validated},${r.not_yet_encoded},${r.pending},${r.pct}%\n`;
   });
 
   const encodedUri = encodeURI(csvContent);
