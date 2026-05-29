@@ -16,7 +16,10 @@
   --green:#16a34a;--green-50:#ecfdf5;
   --orange:#c2410c;--orange-50:#fff7ed;
   --red:#b91c1c;--red-50:#fee2e2;
-  --slate:#475569;--radius:18px;--radius-sm:12px;
+  --slate:#475569;
+  --blue:#1d4ed8;--blue-50:#eff6ff;
+  --violet:#7c3aed;--violet-50:#f5f3ff;
+  --radius:18px;--radius-sm:12px;
 }
 *{box-sizing:border-box}body{font-family:'Manrope',sans-serif;margin:0;background:var(--bg);color:var(--text)}
 .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
@@ -50,6 +53,8 @@
 .status-pill{padding:2px 6px;border-radius:999px;font-size:11px;font-weight:700}
 .status-complete{background:var(--green-50);color:var(--green)}
 .status-pending{background:var(--red-50);color:var(--red)}
+.status-not-yet-validated{background:var(--blue-50);color:var(--blue)}
+.status-not-yet-encoded{background:var(--violet-50);color:var(--violet)}
 </style>
 </head>
 <body>
@@ -76,7 +81,7 @@
       <div class="card-head"><strong>Active Operational Summary</strong></div>
       <div class="table-wrap">
         <table class="table">
-          <thead><tr><th>Municipality</th><th class="num">Total</th><th class="num">Complete</th><th class="num">Incomplete</th><th class="num">Invalid</th><th class="num">Pending</th></tr></thead>
+          <thead><tr><th>Municipality</th><th class="num">Total</th><th class="num">Complete</th><th class="num">Incomplete</th><th class="num">Invalid</th><th class="num">Pending</th><th class="num">Not Yet Validated</th><th class="num">Not Yet Encoded</th></tr></thead>
           <tbody id="municipalityTbody"><tr><td colspan="6">Loading tree parameters...</td></tr></tbody>
         </table>
       </div>
@@ -102,15 +107,17 @@ async function loadMunicipalities() {
         <td class="num" style="color:var(--orange)">${Number(r.incomplete).toLocaleString()}</td>
         <td class="num" style="color:var(--slate)">${Number(r.invalid).toLocaleString()}</td>
         <td class="num" style="color:var(--red)">${Number(r.pending).toLocaleString()}</td>
+        <td class="num" style="color:var(--blue)">${Number(r.not_yet_validated || 0).toLocaleString()}</td>
+        <td class="num" style="color:var(--violet)">${Number(r.not_yet_encoded || 0).toLocaleString()}</td>
       </tr>
       <tr id="brgy-${r.municipality.replace(/\s+/g, '-')}" class="barangay-row">
-        <td colspan="6" class="brgy-list-container"><div class="brgy-grid">Loading cluster entries...</div></td>
+        <td colspan="8" class="brgy-list-container"><div class="brgy-grid">Loading cluster entries...</div></td>
       </tr>
     `).join('');
     
     setupExpandListeners();
     document.getElementById('updatedAt').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
-  } catch(e) { tbody.innerHTML = '<tr><td colspan="6">Failed to bind tree elements.</td></tr>'; }
+  } catch(e) { tbody.innerHTML = '<tr><td colspan="8">Failed to bind tree elements.</td></tr>'; }
 }
 
 function setupExpandListeners() {
@@ -143,17 +150,31 @@ async function fetchBarangaysFor(muni, gridContainer) {
     const brgyMap = {};
     body.data.forEach(row => {
       const bName = row.BARANGAY || 'UNASSIGNED';
-      if (!brgyMap[bName]) brgyMap[bName] = { total: 0, done: 0 };
+      const s = String(row.FINAL_STATUS || '').toUpperCase();
+      if (!brgyMap[bName]) brgyMap[bName] = { total: 0, complete: 0, incomplete: 0, invalid: 0, pending: 0, not_yet_validated: 0, not_yet_encoded: 0 };
       brgyMap[bName].total++;
-      if (String(row.FINAL_STATUS).toUpperCase() === 'COMPLETE') brgyMap[bName].done++;
+      if (s === 'COMPLETE')              brgyMap[bName].complete++;
+      else if (s === 'INCOMPLETE')       brgyMap[bName].incomplete++;
+      else if (s === 'INVALID')          brgyMap[bName].invalid++;
+      else if (s === 'NOT_YET_VALIDATED') brgyMap[bName].not_yet_validated++;
+      else if (s === 'NOT_YET_ENCODED')  brgyMap[bName].not_yet_encoded++;
+      else                               brgyMap[bName].pending++;
     });
 
-    gridContainer.innerHTML = Object.entries(brgyMap).map(([name, data]) => `
+    gridContainer.innerHTML = Object.entries(brgyMap).map(([name, data]) => {
+      const pct = data.total === 0 ? 0 : Math.round((data.complete / data.total) * 100);
+      return `
       <div class="brgy-badge">
         <span>📍 ${name}</span>
-        <strong>${data.done}/${data.total} <span class="status-pill status-complete">OK</span></strong>
+        <span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <strong style="color:var(--green)">${data.complete}/${data.total}</strong>
+          ${data.incomplete > 0 ? `<span class="status-pill" style="background:var(--orange-50);color:var(--orange)">${data.incomplete} inc</span>` : ''}
+          ${data.not_yet_encoded > 0 ? `<span class="status-pill status-not-yet-encoded">${data.not_yet_encoded} nye</span>` : ''}
+          ${data.not_yet_validated > 0 ? `<span class="status-pill status-not-yet-validated">${data.not_yet_validated} nyv</span>` : ''}
+          <span class="status-pill status-complete">${pct}%</span>
+        </span>
       </div>
-    `).join('');
+    `}).join('');
   } catch (e) { gridContainer.innerHTML = '<span class="muted">Error streaming cluster data.</span>'; }
 }
 
