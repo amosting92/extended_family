@@ -728,13 +728,17 @@ else
   }
 
   if (!brgyMap[bKey]) {
-    brgyMap[bKey] = { total: 0, complete: 0 };
+    brgyMap[bKey] = { total: 0, complete: 0, not_yet_validated: 0 };
   }
 
   brgyMap[bKey].total++;
 
   if (s === 'COMPLETE') {
     brgyMap[bKey].complete++;
+  }
+
+  if (s === 'NOT_YET_VALIDATED') {
+    brgyMap[bKey].not_yet_validated++;
   }
 
 });
@@ -796,10 +800,14 @@ if(invalid > 0)
   );
 
   if (!worker) {
-    const slow=Object.entries(brgyMap).map(([name,d])=>({name,total:d.total,done:d.complete,rate:d.total===0?0:Math.round((d.complete/d.total)*100)})).filter(b=>b.rate<45&&b.total>=2).sort((a,b)=>a.rate-b.rate).slice(0,5);
+    const slow=Object.entries(brgyMap)
+      .map(([name,d])=>({name,total:d.total,done:d.complete,nyv:d.not_yet_validated,rate:d.total===0?0:Math.round((d.complete/d.total)*100)}))
+      .filter(b=>b.nyv>=1&&b.total>=2)
+      .sort((a,b)=>b.nyv-a.nyv)
+      .slice(0,5);
     if(slow.length>0){
-      const tags=slow.map(b=>`<span class="target-tag" style="margin-bottom:6px;">📍 ${b.name} (${b.done}/${b.total} Cleared - ${b.rate}%)</span>`).join('');
-      html+=`<div class="insight-row insight-danger"><div class="insight-icon">🗺️</div><div><div class="insight-title">Geographic Bottlenecks: Low Baseline Barangay Sectors (Below 45%)</div><div class="insight-desc">These exact locations across the scope demonstrate severe operational blockage:<div style="margin-top:10px;">${tags}</div></div></div></div>`;
+      const tags=slow.map(b=>`<span class="target-tag" style="margin-bottom:6px;">📍 ${b.name} (${b.nyv} Not Yet Validated out of ${b.total})</span>`).join('');
+      html+=`<div class="insight-row insight-danger"><div class="insight-icon">🗺️</div><div><div class="insight-title">Geographic Bottlenecks: Barangays With Unvalidated Records</div><div class="insight-desc">These barangays still have records with zero field movement (Not Yet Validated):<div style="margin-top:10px;">${tags}</div></div></div></div>`;
     }
   }
 
@@ -1157,14 +1165,16 @@ function pdf_buildAlertHitList(meta, ds, stats) {
     const bm={};
     ds.forEach(r=>{
       const k=`${(r.MUNICIPALITY||'UNKNOWN').trim()}|||${(r.BARANGAY||'UNKNOWN').trim()}`;
-      if(!bm[k]) bm[k]={muni:(r.MUNICIPALITY||'UNKNOWN').trim(),brgy:(r.BARANGAY||'UNKNOWN').trim(),total:0,complete:0};
+      if(!bm[k]) bm[k]={muni:(r.MUNICIPALITY||'UNKNOWN').trim(),brgy:(r.BARANGAY||'UNKNOWN').trim(),total:0,complete:0,not_yet_validated:0};
       bm[k].total++;
-      if(String(r.FINAL_STATUS||'').toUpperCase()==='COMPLETE') bm[k].complete++;
+      const s=String(r.FINAL_STATUS||'').toUpperCase();
+      if(s==='COMPLETE') bm[k].complete++;
+      if(s==='NOT_YET_VALIDATED') bm[k].not_yet_validated++;
     });
-    const slow=Object.values(bm).map(b=>({...b,rate:b.total===0?0:Math.round((b.complete/b.total)*100)})).filter(b=>b.rate<45&&b.total>=2).sort((a,b)=>a.rate-b.rate).slice(0,8);
+    const slow=Object.values(bm).filter(b=>b.not_yet_validated>=1&&b.total>=2).sort((a,b)=>b.not_yet_validated-a.not_yet_validated).slice(0,8);
     if(slow.length>0){
-      const rows=slow.map(b=>`<tr><td style="padding:5px 8px;border:1px solid #e2e8f0;font-size:10px;">📍 ${b.muni} &rarr; <strong>Brgy. ${b.brgy}</strong></td><td style="padding:5px 8px;border:1px solid #e2e8f0;font-size:10px;text-align:right;">${b.complete.toLocaleString()}/${b.total.toLocaleString()} cases completed &mdash; <strong style="color:#b91c1c;">${b.rate}%</strong></td></tr>`).join('');
-      html+=`<div style="margin-bottom:12px;"><div style="font-weight:700;font-size:11px;background:#fef2f2;border:1px solid #fecaca;border-bottom:none;padding:6px 10px;border-radius:4px 4px 0 0;color:#b91c1c;">D. Localized Geographic Bottlenecks (Barangay Clusters &lt; 45%)</div><div style="border:1px solid #fecaca;border-top:none;padding:8px 10px;font-size:10px;line-height:1.6;background:#fff;">The following specific barangay clusters have been identified as severe operational data dead-zones:</div><table style="width:100%;border-collapse:collapse;"><tbody>${rows}</tbody></table></div>`;
+      const rows=slow.map(b=>`<tr><td style="padding:5px 8px;border:1px solid #e2e8f0;font-size:10px;">📍 ${b.muni} &rarr; <strong>Brgy. ${b.brgy}</strong></td><td style="padding:5px 8px;border:1px solid #e2e8f0;font-size:10px;text-align:right;"><strong style="color:#1d4ed8;">${b.not_yet_validated}</strong> Not Yet Validated out of ${b.total} total</td></tr>`).join('');
+      html+=`<div style="margin-bottom:12px;"><div style="font-weight:700;font-size:11px;background:#fef2f2;border:1px solid #fecaca;border-bottom:none;padding:6px 10px;border-radius:4px 4px 0 0;color:#b91c1c;">D. Localized Geographic Bottlenecks — Barangays With Unvalidated Records</div><div style="border:1px solid #fecaca;border-top:none;padding:8px 10px;font-size:10px;line-height:1.6;background:#fff;">The following barangay clusters have records with zero field movement (Not Yet Validated). These are not encoding backlogs — these are areas where validation has not started at all:</div><table style="width:100%;border-collapse:collapse;"><tbody>${rows}</tbody></table></div>`;
     }
   }
 
@@ -1177,8 +1187,8 @@ function pdf_buildRecommendations(meta, stats, ds) {
   const pct = (n) => total===0?0:(n/total)*100;
 
   const bm={};
-  ds.forEach(r=>{ const k=`${r.MUNICIPALITY||''}|||${r.BARANGAY||''}`; if(!bm[k]) bm[k]={total:0,complete:0}; bm[k].total++; if(String(r.FINAL_STATUS||'').toUpperCase()==='COMPLETE') bm[k].complete++; });
-  const hasLowBrgys = Object.values(bm).some(b=>b.total>=2&&(b.complete/b.total)<0.45);
+  ds.forEach(r=>{ const k=`${r.MUNICIPALITY||''}|||${r.BARANGAY||''}`; if(!bm[k]) bm[k]={total:0,not_yet_validated:0}; bm[k].total++; if(String(r.FINAL_STATUS||'').toUpperCase()==='NOT_YET_VALIDATED') bm[k].not_yet_validated++; });
+  const hasLowBrgys = Object.values(bm).some(b=>b.total>=2&&b.not_yet_validated>=1);
 
   const mlP={};
   ds.filter(r=>['PENDING','NOT_YET_VALIDATED'].includes(String(r.FINAL_STATUS||'').toUpperCase())).forEach(r=>{ const ml=r.ML_ASSIGNED||'UNASSIGNED'; mlP[ml]=(mlP[ml]||0)+1; });
